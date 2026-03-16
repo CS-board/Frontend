@@ -8,7 +8,7 @@ export function MainBanner() {
       <div className="mx-auto max-w-7xl px-4 py-16 md:py-24 lg:py-32">
         <div className="mx-auto max-w-3xl text-center">
           <div className="mb-6 inline-block rounded-full border border-border bg-muted px-4 py-1.5">
-            <span className="font-mono text-sm text-muted-foreground">Week 1 • 2025</span>
+            <span className="font-mono text-sm text-muted-foreground">Season 1 • 2026</span>
           </div>
 
           <h1 className="mb-6 font-mono text-4xl font-bold leading-tight tracking-tighter text-foreground md:text-5xl lg:text-6xl text-balance">
@@ -16,7 +16,7 @@ export function MainBanner() {
           </h1>
 
           <p className="mb-8 text-lg text-muted-foreground md:text-xl text-pretty">
-            금오공대 학생들을 위한 백준 주간 챌린지에 참여하세요.
+            금오공과대학교 컴퓨터공학부의 백준 주간 코테 챌린지에 참여하세요.
             <br className="hidden md:block" />
             매일 문제를 풀고 랭킹을 확인하며 함께 성장해요.
           </p>

@@ -1,17 +1,11 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Geist_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 
-const geistMono = Geist_Mono({
-  subsets: ["latin"],
-  variable: "--font-geist-mono",
-})
-
 export const metadata: Metadata = {
-  title: "BOJ Weekly - 백준 주간 챌린지",
-  description: "금오공대 학생들을 위한 백준 주간 챌린지 플랫폼",
+  title: "CHIP_SAT - 주간 코테 챌린지",
+  description: "CHIP_SAT 동아리 주간 코테 챌린지 플랫폼",
   generator: "v0.app",
   icons: {
     icon: [
@@ -45,7 +39,7 @@ export default function RootLayout({
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
         />
       </head>
-      <body className={`${geistMono.variable} font-sans antialiased`}>
+      <body className="font-sans antialiased">
         {children}
         <Analytics />
       </body>
