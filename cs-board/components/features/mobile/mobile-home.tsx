@@ -49,7 +49,7 @@ export function MobileHome() {
         className="flex min-h-screen flex-col items-center justify-center px-6 text-center"
         style={{ opacity: section1Opacity }}
       >
-        <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2">
+        <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-2 dark:border-blue-800 dark:bg-blue-950/30">
           <Sparkles className="h-4 w-4 text-primary" />
           <span className="font-mono text-sm text-primary">{weekLabel}</span>
         </div>
@@ -102,8 +102,8 @@ export function MobileHome() {
             { n: "3", title: "랭킹 확인", desc: "매일 밤 자정에 랭킹이 갱신되고 내 순위를 확인할 수 있어요" },
           ].map(({ n, title, desc }) => (
             <div key={n} className="flex items-start gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                <span className="font-mono text-xl font-bold text-primary">{n}</span>
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm">
+                <span className="font-mono text-xl font-bold">{n}</span>
               </div>
               <div>
                 <h3 className="mb-2 font-mono text-lg font-semibold text-foreground">{title}</h3>

@@ -7,12 +7,11 @@ import { z } from "zod"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { CheckCircle2, Loader2, Eye, EyeOff, ChevronLeft } from "lucide-react"
+import { CheckCircle2, Loader2, Eye, EyeOff, ChevronLeft, ClipboardList, ShieldCheck, LogIn } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { authService } from "@/services/auth"
@@ -42,6 +41,12 @@ const signupSchema = z
   })
 
 type SignupFormData = z.infer<typeof signupSchema>
+
+const steps = [
+  { icon: ClipboardList, label: "기본 정보 입력", desc: "이름, 학번, 학과, 학년" },
+  { icon: ShieldCheck,   label: "메일·백준 인증", desc: "웹메일 및 백준 ID 확인" },
+  { icon: LogIn,         label: "챌린지 참여",    desc: "로그인 후 바로 시작" },
+]
 
 export default function SignupPage() {
   const router = useRouter()
@@ -139,187 +144,255 @@ export default function SignupPage() {
   const isEmailValid = usernameValue?.endsWith("@kumoh.ac.kr")
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-background px-4 py-8">
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-1/3 -left-1/4 h-[600px] w-[600px] rounded-full bg-primary/10 blur-[120px]" />
-        <div className="absolute -bottom-1/3 -right-1/4 h-[500px] w-[500px] rounded-full bg-primary/8 blur-[120px]" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[400px] w-[400px] rounded-full bg-blue-400/5 blur-[80px]" />
+    <div className="flex min-h-screen">
+
+      {/* ── 왼쪽 브랜딩 패널 ── */}
+      <div
+        className="hidden md:flex md:w-[42%] flex-col justify-between p-12 sticky top-0 h-screen overflow-hidden"
+        style={{ background: "linear-gradient(135deg, #3b82f6 0%, #0ea5e9 55%, #38bdf8 100%)" }}
+      >
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
+          <div className="absolute bottom-0 -left-16 h-64 w-64 rounded-full bg-blue-300/20 blur-2xl" />
+          <div
+            className="absolute inset-0 opacity-[0.06]"
+            style={{ backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "28px 28px" }}
+          />
+        </div>
+
+        <Link href="/" className="relative z-10 flex items-center gap-3 w-fit">
+          <Image src="/logo.png" alt="CHIP_SAT" width={44} height={44} className="rounded-xl shadow-lg" />
+          <div>
+            <div className="font-mono text-xl font-bold text-white tracking-tight">CHIP_SAT</div>
+            <div className="text-xs text-blue-100/80">금오공대 챌린지</div>
+          </div>
+        </Link>
+
+        <div className="relative z-10">
+          <h2 className="text-4xl font-bold text-white leading-tight mb-4" style={{ letterSpacing: "-0.02em" }}>
+            3분이면<br />가입 완료
+          </h2>
+          <p className="text-blue-100/80 text-lg mb-10">
+            간단한 정보 입력과 인증만으로<br />
+            챌린지에 바로 참여할 수 있어요.
+          </p>
+          <div className="space-y-5">
+            {steps.map(({ icon: Icon, label, desc }, i) => (
+              <div key={label} className="flex items-center gap-4">
+                <div className="relative flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-white/15 backdrop-blur-sm">
+                  <Icon className="h-5 w-5 text-white" />
+                  <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-white text-blue-600 text-[10px] font-bold shadow">
+                    {i + 1}
+                  </span>
+                </div>
+                <div>
+                  <div className="text-white font-semibold text-sm">{label}</div>
+                  <div className="text-blue-100/70 text-xs">{desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="relative z-10 text-blue-100/60 text-sm">
+          CHIP_SAT © 2025 · 금오공과대학교
+        </div>
       </div>
 
-      <Link
-        href="/"
-        className="fixed top-4 left-4 z-50 inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-      >
-        <ChevronLeft className="h-4 w-4" />
-        홈으로
-      </Link>
+      {/* ── 오른쪽 폼 패널 ── */}
+      <div className="flex flex-1 flex-col bg-background overflow-y-auto">
+        <div className="flex flex-col items-center px-6 py-10 md:px-12">
 
-      <Card className="w-full max-w-md relative z-10">
-        <CardHeader className="space-y-1">
-          <Link href="/" className="flex items-center justify-center gap-3 mb-4 group w-fit mx-auto">
-            <Image src="/logo.png" alt="CHIP_SAT" width={48} height={48} className="rounded-lg" />
-            <span className="font-mono text-2xl font-bold tracking-tight group-hover:text-primary transition-colors">
-              CHIP_SAT
-            </span>
-          </Link>
-          <CardTitle className="text-2xl text-center">회원가입</CardTitle>
-          <CardDescription className="text-center">정보를 입력하고 챌린지에 참여하세요</CardDescription>
-        </CardHeader>
+          <div className="mb-8 w-full max-w-sm">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              홈으로
+            </Link>
+          </div>
 
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {/* 이름 */}
-            <div className="space-y-2">
-              <Label htmlFor="name">이름</Label>
-              <Input id="name" placeholder="홍길동" {...register("name")} />
-              {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
+          <div className="w-full max-w-sm">
+            <div className="mb-8 flex items-center gap-3 md:hidden">
+              <Image src="/logo.png" alt="CHIP_SAT" width={40} height={40} className="rounded-xl" />
+              <span className="font-mono text-xl font-bold">CHIP_SAT</span>
             </div>
 
-            {/* 학번 */}
-            <div className="space-y-2">
-              <Label htmlFor="studentId">학번</Label>
-              <Input id="studentId" placeholder="21000000" {...register("studentId")} />
-              {errors.studentId && <p className="text-xs text-destructive">{errors.studentId.message}</p>}
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold text-foreground mb-2">회원가입</h1>
+              <p className="text-muted-foreground">정보를 입력하고 챌린지에 참여하세요</p>
             </div>
 
-            {/* 웹메일 + 인증 */}
-            <div className="space-y-2">
-              <Label htmlFor="username">웹메일</Label>
-              <div className="flex gap-2">
-                <Input id="username" type="email" placeholder="your@kumoh.ac.kr" {...register("username")} disabled={emailVerified} className="flex-1" />
-                {emailVerified ? (
-                  <Badge variant="outline" className="flex items-center gap-1 px-3 shrink-0 text-green-600 border-green-600 bg-green-50 dark:bg-green-950">
-                    <CheckCircle2 className="h-3.5 w-3.5" />인증완료
-                  </Badge>
-                ) : (
-                  <Button type="button" variant="outline" size="sm" onClick={handleSendEmailCode}
-                    disabled={sendingCode || !isEmailValid}
-                    className="shrink-0 disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100">
-                    {sendingCode ? <Loader2 className="h-4 w-4 animate-spin" /> : emailCodeSent ? "재전송" : "인증코드 전송"}
-                  </Button>
-                )}
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              {/* 이름 */}
+              <div className="space-y-1.5">
+                <Label htmlFor="name" className="text-sm font-semibold">이름</Label>
+                <Input id="name" placeholder="홍길동" className="h-11" {...register("name")} />
+                {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
               </div>
-              {!errors.username && <p className="text-xs text-muted-foreground">@kumoh.ac.kr 메일만 사용 가능합니다</p>}
-              {errors.username && <p className="text-xs text-destructive">{errors.username.message}</p>}
-              {emailCodeSent && !emailVerified && (
+
+              {/* 학번 */}
+              <div className="space-y-1.5">
+                <Label htmlFor="studentId" className="text-sm font-semibold">학번</Label>
+                <Input id="studentId" placeholder="21000000" className="h-11" {...register("studentId")} />
+                {errors.studentId && <p className="text-xs text-destructive">{errors.studentId.message}</p>}
+              </div>
+
+              {/* 웹메일 + 인증 */}
+              <div className="space-y-2">
+                <Label htmlFor="username" className="text-sm font-semibold">웹메일</Label>
                 <div className="flex gap-2">
-                  <Input placeholder="인증 코드 입력" value={emailCode}
-                    onChange={(e) => setEmailCode(e.target.value.replace(/\D/g, ""))}
-                    maxLength={10} inputMode="numeric" className="flex-1" />
-                  <Button type="button" variant="outline" size="sm" onClick={handleVerifyEmail}
-                    disabled={verifyingEmail || emailCode.length === 0}
-                    className="shrink-0 disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100">
-                    {verifyingEmail ? <Loader2 className="h-4 w-4 animate-spin" /> : "인증 확인"}
-                  </Button>
+                  <Input
+                    id="username" type="email" placeholder="your@kumoh.ac.kr"
+                    className="h-11 flex-1"
+                    {...register("username")} disabled={emailVerified}
+                  />
+                  {emailVerified ? (
+                    <Badge variant="outline" className="flex items-center gap-1 px-3 shrink-0 text-green-600 border-green-600 bg-green-50 dark:bg-green-950">
+                      <CheckCircle2 className="h-3.5 w-3.5" />인증완료
+                    </Badge>
+                  ) : (
+                    <Button type="button" variant="outline" size="sm" onClick={handleSendEmailCode}
+                      disabled={sendingCode || !isEmailValid}
+                      className="shrink-0 h-11 disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100">
+                      {sendingCode ? <Loader2 className="h-4 w-4 animate-spin" /> : emailCodeSent ? "재전송" : "인증코드 전송"}
+                    </Button>
+                  )}
+                </div>
+                {!errors.username && <p className="text-xs text-muted-foreground">@kumoh.ac.kr 메일만 사용 가능합니다</p>}
+                {errors.username && <p className="text-xs text-destructive">{errors.username.message}</p>}
+                {emailCodeSent && !emailVerified && (
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="인증 코드 입력" value={emailCode}
+                      onChange={(e) => setEmailCode(e.target.value.replace(/\D/g, ""))}
+                      maxLength={10} inputMode="numeric" className="h-11 flex-1"
+                    />
+                    <Button type="button" variant="outline" size="sm" onClick={handleVerifyEmail}
+                      disabled={verifyingEmail || emailCode.length === 0}
+                      className="shrink-0 h-11 disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100">
+                      {verifyingEmail ? <Loader2 className="h-4 w-4 animate-spin" /> : "인증 확인"}
+                    </Button>
+                  </div>
+                )}
+                {emailError && <p className="text-xs text-destructive">{emailError}</p>}
+              </div>
+
+              {/* 백준 ID + 인증 */}
+              <div className="space-y-1.5">
+                <Label htmlFor="bojId" className="text-sm font-semibold">백준 ID</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="bojId" placeholder="백준 아이디"
+                    className="h-11 flex-1"
+                    {...register("bojId")} disabled={baekjoonVerified}
+                  />
+                  {baekjoonVerified ? (
+                    <Badge variant="outline" className="flex items-center gap-1 px-3 shrink-0 text-green-600 border-green-600 bg-green-50 dark:bg-green-950">
+                      <CheckCircle2 className="h-3.5 w-3.5" />인증완료
+                    </Badge>
+                  ) : (
+                    <Button type="button" variant="outline" size="sm" onClick={handleVerifyBaekjoon}
+                      disabled={verifyingBaekjoon || !bojIdValue}
+                      className="shrink-0 h-11 disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100">
+                      {verifyingBaekjoon ? <Loader2 className="h-4 w-4 animate-spin" /> : "인증"}
+                    </Button>
+                  )}
+                </div>
+                {errors.bojId && <p className="text-xs text-destructive">{errors.bojId.message}</p>}
+                {baekjoonError && <p className="text-xs text-destructive">{baekjoonError}</p>}
+              </div>
+
+              {/* 비밀번호 */}
+              <div className="space-y-1.5">
+                <Label htmlFor="password" className="text-sm font-semibold">비밀번호</Label>
+                <div className="relative">
+                  <Input
+                    id="password" type={showPassword ? "text" : "password"}
+                    placeholder="대소문자+숫자+특수문자, 10~20자"
+                    className="h-11 pr-10" {...register("password")}
+                  />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
+              </div>
+
+              {/* 비밀번호 확인 */}
+              <div className="space-y-1.5">
+                <Label htmlFor="confirmPassword" className="text-sm font-semibold">비밀번호 확인</Label>
+                <div className="relative">
+                  <Input
+                    id="confirmPassword" type={showConfirmPassword ? "text" : "password"}
+                    placeholder="비밀번호 재입력"
+                    className="h-11 pr-10" {...register("confirmPassword")}
+                  />
+                  <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                {errors.confirmPassword && <p className="text-xs text-destructive">{errors.confirmPassword.message}</p>}
+              </div>
+
+              {/* 학과 */}
+              <div className="space-y-1.5">
+                <Label htmlFor="department" className="text-sm font-semibold">학과</Label>
+                <Select onValueChange={(val) => setValue("department", val, { shouldValidate: true })}>
+                  <SelectTrigger id="department" className="h-11">
+                    <SelectValue placeholder={loadingDepts ? "불러오는 중..." : "학과 선택"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {departments.map((dept) => (
+                      <SelectItem key={dept} value={dept}>{dept}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.department && <p className="text-xs text-destructive">{errors.department.message}</p>}
+              </div>
+
+              {/* 학년 */}
+              <div className="space-y-1.5">
+                <Label htmlFor="grade" className="text-sm font-semibold">학년</Label>
+                <Select onValueChange={(val) => setValue("grade", val, { shouldValidate: true })}>
+                  <SelectTrigger id="grade" className="h-11">
+                    <SelectValue placeholder="학년 선택" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[1, 2, 3, 4, 5].map((g) => (
+                      <SelectItem key={g} value={String(g)}>{g}학년</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.grade && <p className="text-xs text-destructive">{errors.grade.message}</p>}
+              </div>
+
+              {submitError && (
+                <div className="rounded-xl border border-destructive/30 bg-destructive/8 p-3 text-sm text-destructive text-center">
+                  {submitError}
                 </div>
               )}
-              {emailError && <p className="text-xs text-destructive">{emailError}</p>}
+
+              <Button
+                type="submit"
+                className="w-full h-11 text-base font-semibold disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100"
+                disabled={submitting}
+              >
+                {submitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                회원가입
+              </Button>
+            </form>
+
+            <div className="mt-6 text-center text-sm text-muted-foreground">
+              이미 계정이 있으신가요?{" "}
+              <Link href="/login" className="text-primary font-semibold hover:underline">로그인</Link>
             </div>
-
-            {/* 백준 ID + 인증 */}
-            <div className="space-y-2">
-              <Label htmlFor="bojId">백준 ID</Label>
-              <div className="flex gap-2">
-                <Input id="bojId" placeholder="백준 아이디" {...register("bojId")} disabled={baekjoonVerified} className="flex-1" />
-                {baekjoonVerified ? (
-                  <Badge variant="outline" className="flex items-center gap-1 px-3 shrink-0 text-green-600 border-green-600 bg-green-50 dark:bg-green-950">
-                    <CheckCircle2 className="h-3.5 w-3.5" />인증완료
-                  </Badge>
-                ) : (
-                  <Button type="button" variant="outline" size="sm" onClick={handleVerifyBaekjoon}
-                    disabled={verifyingBaekjoon || !bojIdValue}
-                    className="shrink-0 disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100">
-                    {verifyingBaekjoon ? <Loader2 className="h-4 w-4 animate-spin" /> : "인증"}
-                  </Button>
-                )}
-              </div>
-              {errors.bojId && <p className="text-xs text-destructive">{errors.bojId.message}</p>}
-              {baekjoonError && <p className="text-xs text-destructive">{baekjoonError}</p>}
-            </div>
-
-            {/* 비밀번호 */}
-            <div className="space-y-2">
-              <Label htmlFor="password">비밀번호</Label>
-              <div className="relative">
-                <Input id="password" type={showPassword ? "text" : "password"}
-                  placeholder="대소문자+숫자+특수문자, 10~20자" {...register("password")} className="pr-10" />
-                <button type="button" onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-              {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
-            </div>
-
-            {/* 비밀번호 확인 */}
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">비밀번호 확인</Label>
-              <div className="relative">
-                <Input id="confirmPassword" type={showConfirmPassword ? "text" : "password"}
-                  placeholder="비밀번호 재입력" {...register("confirmPassword")} className="pr-10" />
-                <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
-                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-              {errors.confirmPassword && <p className="text-xs text-destructive">{errors.confirmPassword.message}</p>}
-            </div>
-
-            {/* 학과 */}
-            <div className="space-y-2">
-              <Label htmlFor="department">학과</Label>
-              <Select onValueChange={(val) => setValue("department", val, { shouldValidate: true })}>
-                <SelectTrigger id="department">
-                  <SelectValue placeholder={loadingDepts ? "불러오는 중..." : "학과 선택"} />
-                </SelectTrigger>
-                <SelectContent>
-                  {departments.map((dept) => (
-                    <SelectItem key={dept} value={dept}>{dept}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.department && <p className="text-xs text-destructive">{errors.department.message}</p>}
-            </div>
-
-            {/* 학년 */}
-            <div className="space-y-2">
-              <Label htmlFor="grade">학년</Label>
-              <Select onValueChange={(val) => setValue("grade", val, { shouldValidate: true })}>
-                <SelectTrigger id="grade">
-                  <SelectValue placeholder="학년 선택" />
-                </SelectTrigger>
-                <SelectContent>
-                  {[1, 2, 3, 4, 5].map((g) => (
-                    <SelectItem key={g} value={String(g)}>{g}학년</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.grade && <p className="text-xs text-destructive">{errors.grade.message}</p>}
-            </div>
-
-            {submitError && (
-              <p className="text-sm text-destructive text-center bg-destructive/10 rounded-md p-2">
-                {submitError}
-              </p>
-            )}
-
-            <Button
-              type="submit"
-              className="w-full disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100"
-              size="lg"
-              disabled={submitting}
-            >
-              {submitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-              회원가입
-            </Button>
-          </form>
-
-          <div className="text-center text-sm text-muted-foreground mt-4">
-            이미 계정이 있으신가요?{" "}
-            <Link href="/login" className="text-primary hover:underline font-medium">로그인</Link>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   )
 }

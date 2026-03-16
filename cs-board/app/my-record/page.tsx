@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import Image from "next/image"
 import { useState, useEffect } from "react"
@@ -132,16 +132,20 @@ export default function MyRecordPage() {
 
             {/* Current Challenge Status */}
             {currentChallenge && progress && (
-              <Card className="border-primary/50 bg-primary/5">
-                <CardHeader>
+              <Card className="overflow-hidden border-primary/30">
+                <div className="h-1.5 w-full bg-gradient-to-r from-blue-500 via-sky-400 to-blue-400" />
+                <CardHeader className="pb-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <Badge variant="outline" className="mb-2 font-mono">현재 진행 중</Badge>
+                      <Badge className="mb-2 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">🔥 현재 진행 중</Badge>
                       <CardTitle className="text-2xl">{currentChallenge.title}</CardTitle>
                     </div>
-                    <Badge variant="secondary" className="font-mono text-lg px-4 py-2">
-                      {Math.ceil((new Date(currentChallenge.endAt).getTime() - Date.now()) / 86400000)}일 남음
-                    </Badge>
+                    <div className="rounded-2xl bg-primary/10 px-4 py-2 text-center">
+                      <p className="font-mono text-2xl font-bold text-primary">
+                        {Math.ceil((new Date(currentChallenge.endAt).getTime() - Date.now()) / 86400000)}
+                      </p>
+                      <p className="text-xs text-muted-foreground">일 남음</p>
+                    </div>
                   </div>
                   <CardDescription>
                     {formatDate(currentChallenge.startAt)} – {formatDate(currentChallenge.endAt)}
@@ -149,43 +153,41 @@ export default function MyRecordPage() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="grid gap-4 md:grid-cols-3">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                        <Trophy className="h-6 w-6" />
+                    <div className="rounded-2xl bg-blue-50 dark:bg-blue-950/30 p-4 flex items-center gap-3">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/50">
+                        <Trophy className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                       </div>
                       <div>
-                        <p className="text-2xl font-bold">{progress.currentRank}위</p>
-                        <p className="text-sm text-muted-foreground">현재 순위</p>
+                        <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">{progress.currentRank}위</p>
+                        <p className="text-sm text-blue-500 dark:text-blue-400">현재 순위</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                        <Target className="h-6 w-6" />
+                    <div className="rounded-2xl bg-sky-50 dark:bg-sky-950/30 p-4 flex items-center gap-3">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-sky-100 dark:bg-sky-900/50">
+                        <Target className="h-6 w-6 text-sky-600 dark:text-sky-400" />
                       </div>
                       <div>
-                        <p className="text-2xl font-bold">{progress.currentScore}</p>
-                        <p className="text-sm text-muted-foreground">현재 점수</p>
+                        <p className="text-2xl font-bold text-sky-700 dark:text-sky-300">{progress.currentScore}</p>
+                        <p className="text-sm text-sky-500 dark:text-sky-400">현재 점수</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                        <TrendingUp className="h-6 w-6" />
+                    <div className="rounded-2xl bg-green-50 dark:bg-green-950/30 p-4 flex items-center gap-3">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 dark:bg-green-900/50">
+                        <TrendingUp className="h-6 w-6 text-green-600 dark:text-green-400" />
                       </div>
                       <div>
-                        <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-                          +{progress.scoreDelta}
-                        </p>
-                        <p className="text-sm text-muted-foreground">오늘 획득 점수</p>
+                        <p className="text-2xl font-bold text-green-700 dark:text-green-300">+{progress.scoreDelta}</p>
+                        <p className="text-sm text-green-500 dark:text-green-400">오늘 획득 점수</p>
                       </div>
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">목표 달성률</span>
-                      <span className="font-mono font-medium">{achievementPct}%</span>
+                      <span className="font-medium text-foreground">목표 달성률</span>
+                      <span className="font-mono font-bold text-primary">{achievementPct}%</span>
                     </div>
-                    <Progress value={achievementPct} className="h-2" />
+                    <Progress value={achievementPct} className="h-3 rounded-full" />
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
                       <span>0점</span>
                       <span>목표 {progress.goalScore}점</span>
@@ -258,34 +260,40 @@ export default function MyRecordPage() {
 
             {/* Summary Cards */}
             <div className="grid gap-4 md:grid-cols-3">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">참여 주차</CardTitle>
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{weeks.length}주</div>
-                  <p className="text-xs text-muted-foreground">총 참여 횟수</p>
+              <Card className="hover:shadow-md transition-shadow">
+                <CardContent className="p-6 flex items-center gap-4">
+                  <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-blue-50 dark:bg-blue-950/30">
+                    <Calendar className="h-7 w-7 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">참여 주차</p>
+                    <div className="text-2xl font-bold">{weeks.length}주</div>
+                    <p className="text-xs text-muted-foreground">총 참여 횟수</p>
+                  </div>
                 </CardContent>
               </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">최고 점수</CardTitle>
-                  <Trophy className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{summary?.maxPoints ?? "—"}</div>
-                  <p className="text-xs text-muted-foreground">역대 최고</p>
+              <Card className="hover:shadow-md transition-shadow">
+                <CardContent className="p-6 flex items-center gap-4">
+                  <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-yellow-50 dark:bg-yellow-950/30">
+                    <Trophy className="h-7 w-7 text-yellow-600 dark:text-yellow-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">최고 점수</p>
+                    <div className="text-2xl font-bold">{summary?.maxPoints ?? "—"}</div>
+                    <p className="text-xs text-muted-foreground">역대 최고</p>
+                  </div>
                 </CardContent>
               </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">총 해결 문제</CardTitle>
-                  <Target className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{summary?.totalSolvedCount ?? "—"}</div>
-                  <p className="text-xs text-muted-foreground">누적 문제 수</p>
+              <Card className="hover:shadow-md transition-shadow">
+                <CardContent className="p-6 flex items-center gap-4">
+                  <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-sky-50 dark:bg-sky-950/30">
+                    <Target className="h-7 w-7 text-sky-600 dark:text-sky-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">총 해결 문제</p>
+                    <div className="text-2xl font-bold">{summary?.totalSolvedCount ?? "—"}</div>
+                    <p className="text-xs text-muted-foreground">누적 문제 수</p>
+                  </div>
                 </CardContent>
               </Card>
             </div>

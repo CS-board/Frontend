@@ -102,7 +102,7 @@ export function MobileMenu() {
                   onClick={() => setIsOpen(false)}
                   className={cn(
                     "flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium transition-colors",
-                    isActive ? "bg-accent text-accent-foreground" : "text-foreground/70 hover:bg-accent/50 hover:text-foreground",
+                    isActive ? "bg-primary text-primary-foreground shadow-sm" : "text-foreground/70 hover:bg-primary/10 hover:text-primary",
                   )}
                 >
                   <Icon className="h-5 w-5" />
