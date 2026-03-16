@@ -167,7 +167,7 @@ export default function SignupPage() {
           <Image src="/logo.png" alt="CHIP_SAT" width={44} height={44} className="rounded-xl shadow-lg" />
           <div>
             <div className="font-mono text-xl font-bold text-white tracking-tight">CHIP_SAT</div>
-            <div className="text-xs text-blue-100/80">주간 코테 챌린지</div>
+            <div className="text-xs text-blue-100/80">주간 백준 챌린지</div>
           </div>
         </Link>
 

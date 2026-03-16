@@ -16,7 +16,7 @@ export function MainBanner() {
           </h1>
 
           <p className="mb-8 text-lg text-muted-foreground md:text-xl text-pretty">
-            금오공과대학교 컴퓨터공학부의 백준 주간 코테 챌린지에 참여하세요.
+            금오공과대학교 컴퓨터공학부의 주간 백준 챌린지에 참여하세요.
             <br className="hidden md:block" />
             매일 문제를 풀고 랭킹을 확인하며 함께 성장해요.
           </p>

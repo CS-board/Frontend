@@ -4,8 +4,8 @@ import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "CHIP_SAT - 주간 코테 챌린지",
-  description: "CHIP_SAT 동아리 주간 코테 챌린지 플랫폼",
+  title: "CHIP_SAT - 주간 백준 챌린지",
+  description: "CHIP_SAT 동아리 주간 백준 챌린지 플랫폼",
   generator: "v0.app",
   icons: {
     icon: [

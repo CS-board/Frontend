@@ -31,7 +31,7 @@ export function Sidebar() {
           <Image src="/logo.png" alt="CHIP_SAT" width={40} height={40} className="rounded-lg" />
           <div>
             <div className="font-mono text-lg font-bold text-sidebar-foreground">CHIP_SAT</div>
-            <div className="text-xs text-sidebar-foreground/60">주간 코테 챌린지</div>
+            <div className="text-xs text-sidebar-foreground/60">주간 백준 챌린지</div>
           </div>
         </Link>
 
