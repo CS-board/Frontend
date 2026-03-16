@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { Mail } from "lucide-react"
 
-const MEMBERS = [
+const MEMBERS: { name: string; role: string }[] = [
   // 필요 시 관계자 추가: { name: "홍길동", role: "운영" }
 ]
 
