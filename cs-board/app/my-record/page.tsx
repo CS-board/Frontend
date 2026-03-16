@@ -6,6 +6,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Sidebar } from "@/components/features/sidebar"
 import { MobileMenu } from "@/components/features/mobile-menu"
+import { Footer } from "@/components/features/footer"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
@@ -106,7 +107,7 @@ export default function MyRecordPage() {
   const weekDays = currentChallenge ? getWeekDays(currentChallenge.startAt) : []
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen flex flex-col bg-background">
       <header className="sticky top-0 z-50 flex items-center justify-between border-b border-border bg-background px-4 py-3 md:hidden">
         <div className="flex items-center gap-2">
           <Image src="/logo.png" alt="CHIP_SAT" width={32} height={32} className="rounded-lg" />
@@ -115,10 +116,11 @@ export default function MyRecordPage() {
         <MobileMenu />
       </header>
 
-      <div className="flex">
+      <div className="flex flex-1 min-h-0">
         <Sidebar />
-        <main className="flex-1 p-4 md:p-8">
-          <div className="mx-auto max-w-4xl space-y-8">
+        <main className="flex-1 flex flex-col min-h-screen">
+          <div className="flex-1 p-4 md:p-8">
+          <div className="mx-auto max-w-7xl space-y-8">
             <div>
               <h1 className="text-3xl font-bold text-balance">내 기록</h1>
               <p className="text-muted-foreground mt-2">이번 주 진행 상황과 활동 내역을 확인하세요</p>
@@ -331,6 +333,8 @@ export default function MyRecordPage() {
               </Card>
             )}
           </div>
+          </div>
+          <Footer />
         </main>
       </div>
     </div>

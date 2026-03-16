@@ -5,6 +5,7 @@ import { useState, useMemo, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { Sidebar } from "@/components/features/sidebar"
 import { MobileMenu } from "@/components/features/mobile-menu"
+import { Footer } from "@/components/features/footer"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -87,7 +88,7 @@ export default function RankingPage() {
   const top3 = sorted.filter(u => u.rank <= 3).sort((a, b) => a.rank - b.rank)
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen flex flex-col bg-background">
       <header className="sticky top-0 z-50 flex items-center justify-between border-b border-border bg-background px-4 py-3 md:hidden">
         <div className="flex items-center gap-2">
           <Image src="/logo.png" alt="CHIP_SAT" width={32} height={32} className="rounded-lg" />
@@ -96,10 +97,11 @@ export default function RankingPage() {
         <MobileMenu />
       </header>
 
-      <div className="flex">
+      <div className="flex flex-1 min-h-0">
         <Sidebar />
-        <main className="flex-1 p-4 md:p-8">
-          <div className="mx-auto max-w-5xl space-y-8">
+        <main className="flex-1 flex flex-col min-h-screen">
+          <div className="flex-1 p-4 md:p-8">
+          <div className="mx-auto max-w-7xl space-y-8">
 
             {/* Header */}
             <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
@@ -121,7 +123,7 @@ export default function RankingPage() {
                 <Button variant="outline" size="icon" onClick={() => setChallengeId(c => Math.max(1, c - 1))} disabled={challengeId <= 1 || loading}>
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <span className="font-mono text-sm text-muted-foreground px-2">Week {challengeId}</span>
+                <span className="font-mono text-sm text-muted-foreground px-2">Season {challengeId}</span>
                 <Button variant="outline" size="icon" onClick={() => setChallengeId(c => c + 1)} disabled={loading}>
                   <ChevronRight className="h-4 w-4" />
                 </Button>
@@ -314,6 +316,8 @@ export default function RankingPage() {
               </CardContent>
             </Card>
           </div>
+          </div>
+          <Footer />
         </main>
       </div>
     </div>
