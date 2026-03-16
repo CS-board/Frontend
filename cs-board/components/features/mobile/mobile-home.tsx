@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import { ChevronDown, MessageSquare, Calendar, Sparkles, Clock, Target } from "lucide-react"
+import { Footer } from "@/components/features/footer"
 import { useEffect, useState } from "react"
 import { challengeService } from "@/services/challenge"
 import { useAuth } from "@/hooks/use-auth"
@@ -40,7 +41,7 @@ export function MobileHome() {
   const section5Opacity = Math.max(0, Math.min(1, (scrollY - 1500) / 400))
 
   const ctaHref = isLoggedIn ? "/my-record" : "/login"
-  const weekLabel = challenge?.title ?? "2025 Week 1"
+  const weekLabel = challenge?.title ?? "Season 1 • 2026"
 
   return (
     <div className="min-h-screen bg-background">
@@ -59,7 +60,7 @@ export function MobileHome() {
           백준 챌린지
         </h1>
 
-        <p className="mb-4 text-lg text-muted-foreground">금오공대 학생들을 위한</p>
+        <p className="mb-4 text-lg text-muted-foreground">CHIP_SAT 부원들을 위한</p>
         <p className="mb-16 text-lg text-muted-foreground">주간 코딩 챌린지</p>
 
         <div className="mb-16 flex gap-8">
@@ -228,9 +229,7 @@ export function MobileHome() {
           </div>
         </div>
 
-        <footer className="mt-24 border-t border-border pt-8 text-center text-sm text-muted-foreground">
-          <p>CHIP_SAT © 2025 · 금오공과대학교</p>
-        </footer>
+        <Footer />
       </section>
     </div>
   )

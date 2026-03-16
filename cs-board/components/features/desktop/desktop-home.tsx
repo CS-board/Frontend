@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Sidebar } from "@/components/features/sidebar"
+import { Footer } from "@/components/features/footer"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Clock, Calendar, Target, Users, CheckCircle2, Trophy, Hash } from "lucide-react"
@@ -32,7 +33,7 @@ export function DesktopHome() {
   }, [])
 
   const ctaHref = isLoggedIn ? "/my-record" : "/login"
-  const weekLabel = challenge?.title ?? "Week 1 • 2025"
+  const weekLabel = challenge?.title ?? "Season 1 • 2026"
   const dateRange = challenge
     ? `${formatDate(challenge.startAt)} – ${formatDate(challenge.endAt)}`
     : null
@@ -44,7 +45,8 @@ export function DesktopHome() {
     <div className="flex min-h-screen bg-background">
       <Sidebar />
 
-      <main className="flex-1">
+      <main className="flex-1 flex flex-col">
+        <div className="flex-1">
         {/* Hero Banner */}
         <section className="relative overflow-hidden"
           style={{ background: "linear-gradient(135deg, #3b82f6 0%, #0ea5e9 55%, #38bdf8 100%)" }}>
@@ -74,7 +76,7 @@ export function DesktopHome() {
                 </h1>
 
                 <p className="mb-8 text-lg leading-relaxed text-blue-100/80">
-                  금오공대 학생들을 위한 백준 주간 챌린지에 참여하세요.
+                  CHIP_SAT 부원들을 위한 백준 주간 챌린지에 참여하세요.
                   <br />
                   매일 문제를 풀고 랭킹을 확인하며 함께 성장해요.
                 </p>
@@ -251,6 +253,8 @@ export function DesktopHome() {
             </p>
           </div>
         </section>
+        </div>
+        <Footer />
       </main>
     </div>
   )
