@@ -25,7 +25,7 @@ type LoginFormData = z.infer<typeof loginSchema>
 const features = [
   { icon: Trophy,  text: "매일 자동 집계되는 실시간 랭킹" },
   { icon: Target,  text: "백준 풀이 점수 자동 반영" },
-  { icon: Users,   text: "금오공대 학생들과 함께 성장" },
+  { icon: Users,   text: "CHIP_SAT 부원들과 함께 성장" },
   { icon: Zap,     text: "매일 밤 자정 순위 업데이트" },
 ]
 
@@ -74,18 +74,18 @@ export default function LoginPage() {
           <Image src="/logo.png" alt="CHIP_SAT" width={44} height={44} className="rounded-xl shadow-lg" />
           <div>
             <div className="font-mono text-xl font-bold text-white tracking-tight">CHIP_SAT</div>
-            <div className="text-xs text-blue-100/80">금오공대 챌린지</div>
+            <div className="text-xs text-blue-100/80">주간 코테 챌린지</div>
           </div>
         </Link>
 
         {/* 메인 카피 */}
-        <div className="relative z-10">
+        <div className="relative z-10 flex-1 flex flex-col justify-center py-8">
           <h2 className="text-4xl font-bold text-white leading-tight mb-4" style={{ letterSpacing: "-0.02em" }}>
             매일 성장하는<br />코딩 챌린지
           </h2>
           <p className="text-blue-100/80 text-lg mb-10">
             백준 문제를 풀고 자동으로 점수를 쌓으세요.<br />
-            금오공대 동료들과 함께 성장합니다.
+            CHIP_SAT 부원들과 함께 성장합니다.
           </p>
 
           <div className="space-y-4">
@@ -102,14 +102,14 @@ export default function LoginPage() {
 
         {/* 하단 */}
         <div className="relative z-10 text-blue-100/60 text-sm">
-          CHIP_SAT © 2025 · 금오공과대학교
+          CHIP_SAT © 2026 · 국립금오공과대학교 컴퓨터공학부
         </div>
       </div>
 
       {/* ── 오른쪽 폼 패널 ── */}
-      <div className="flex flex-1 flex-col items-center justify-center bg-background px-6 py-12 md:px-12">
-        {/* 홈으로 버튼 */}
-        <div className="mb-8 w-full max-w-sm">
+      <div className="flex flex-1 flex-col bg-background">
+        {/* 홈으로 버튼 - 좌상단 고정 */}
+        <div className="px-6 pt-6 md:px-12">
           <Link
             href="/"
             className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -119,6 +119,7 @@ export default function LoginPage() {
           </Link>
         </div>
 
+        <div className="flex flex-1 flex-col items-center justify-center px-6 py-8 md:px-12">
         <div className="w-full max-w-sm">
           {/* 모바일용 로고 */}
           <div className="mb-8 flex items-center gap-3 md:hidden">
@@ -185,6 +186,7 @@ export default function LoginPage() {
               비밀번호를 잊으셨나요?
             </Link>
           </div>
+        </div>
         </div>
       </div>
     </div>

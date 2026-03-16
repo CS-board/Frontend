@@ -88,7 +88,10 @@ export default function SignupPage() {
   useEffect(() => {
     authService.getDepartments()
       .then(setDepartments)
-      .catch(() => setDepartments([]))
+      .catch((e) => {
+        console.error("[학과 목록 로드 실패]", e)
+        setDepartments([])
+      })
       .finally(() => setLoadingDepts(false))
   }, [])
 
@@ -148,7 +151,7 @@ export default function SignupPage() {
 
       {/* ── 왼쪽 브랜딩 패널 ── */}
       <div
-        className="hidden md:flex md:w-[42%] flex-col justify-between p-12 sticky top-0 h-screen overflow-hidden"
+        className="hidden md:flex md:w-[45%] flex-col justify-between p-12 sticky top-0 h-screen overflow-hidden"
         style={{ background: "linear-gradient(135deg, #3b82f6 0%, #0ea5e9 55%, #38bdf8 100%)" }}
       >
         <div className="pointer-events-none absolute inset-0">
@@ -164,11 +167,11 @@ export default function SignupPage() {
           <Image src="/logo.png" alt="CHIP_SAT" width={44} height={44} className="rounded-xl shadow-lg" />
           <div>
             <div className="font-mono text-xl font-bold text-white tracking-tight">CHIP_SAT</div>
-            <div className="text-xs text-blue-100/80">금오공대 챌린지</div>
+            <div className="text-xs text-blue-100/80">주간 코테 챌린지</div>
           </div>
         </Link>
 
-        <div className="relative z-10">
+        <div className="relative z-10 flex-1 flex flex-col justify-center py-8">
           <h2 className="text-4xl font-bold text-white leading-tight mb-4" style={{ letterSpacing: "-0.02em" }}>
             3분이면<br />가입 완료
           </h2>
@@ -195,24 +198,24 @@ export default function SignupPage() {
         </div>
 
         <div className="relative z-10 text-blue-100/60 text-sm">
-          CHIP_SAT © 2025 · 금오공과대학교
+          CHIP_SAT © 2026 · 국립금오공과대학교 컴퓨터공학부
         </div>
       </div>
 
       {/* ── 오른쪽 폼 패널 ── */}
       <div className="flex flex-1 flex-col bg-background overflow-y-auto">
-        <div className="flex flex-col items-center px-6 py-10 md:px-12">
+        {/* 로그인으로 버튼 - 좌상단 고정 */}
+        <div className="px-6 pt-6 md:px-12">
+          <Link
+            href="/login"
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            로그인으로
+          </Link>
+        </div>
 
-          <div className="mb-8 w-full max-w-sm">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <ChevronLeft className="h-4 w-4" />
-              홈으로
-            </Link>
-          </div>
-
+        <div className="flex flex-col items-center px-6 py-8 md:px-12">
           <div className="w-full max-w-sm">
             <div className="mb-8 flex items-center gap-3 md:hidden">
               <Image src="/logo.png" alt="CHIP_SAT" width={40} height={40} className="rounded-xl" />
@@ -362,7 +365,7 @@ export default function SignupPage() {
                     <SelectValue placeholder="학년 선택" />
                   </SelectTrigger>
                   <SelectContent>
-                    {[1, 2, 3, 4, 5].map((g) => (
+                    {[1, 2, 3, 4].map((g) => (
                       <SelectItem key={g} value={String(g)}>{g}학년</SelectItem>
                     ))}
                   </SelectContent>
