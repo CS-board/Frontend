@@ -2,7 +2,6 @@
 
 import Image from "next/image"
 import { useState, useEffect } from "react"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Sidebar } from "@/components/features/sidebar"
 import { MobileMenu } from "@/components/features/mobile-menu"
@@ -10,7 +9,7 @@ import { Footer } from "@/components/features/footer"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { TrendingUp, Trophy, Target, Calendar, Loader2 } from "lucide-react"
+import { TrendingUp, Trophy, Target, Calendar, Loader2, FileQuestion } from "lucide-react"
 import { recordService } from "@/services/record"
 import { TOKEN_KEY } from "@/constants"
 import type { MyProgressSummary, MyRecordSummary, MyRecordWeekItem, DailySolvedProblem } from "@/types"
@@ -28,22 +27,51 @@ const TIER_SCORES: Record<number, number> = {
   11:22,12:25,13:28,14:31,15:35,16:45,17:50,18:55,19:60,20:65,
   21:80,22:90,23:100,24:110,25:120,26:150,27:150,28:150,29:150,30:150,
 }
+const TIER_COLORS: Record<string, string> = {
+  "브론즈": "bg-amber-700/10 text-amber-700 dark:text-amber-500",
+  "실버": "bg-slate-200/50 text-slate-600 dark:text-slate-300",
+  "골드": "bg-yellow-100 text-yellow-700 dark:text-yellow-400",
+  "플래티넘": "bg-teal-100/50 text-teal-700 dark:text-teal-400",
+  "다이아": "bg-blue-100/50 text-blue-700 dark:text-blue-400",
+  "루비": "bg-red-100/50 text-red-700 dark:text-red-400",
+}
+function getTierColor(label: string) {
+  for (const key of Object.keys(TIER_COLORS)) {
+    if (label.startsWith(key)) return TIER_COLORS[key]
+  }
+  return ""
+}
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" })
 }
-function toYYYYMMDD(d: Date) {
-  return d.toISOString().split("T")[0]
+
+// Use local time (not UTC) to avoid off-by-one date issues in KST
+function toYYYYMMDD(d: Date): string {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, "0")
+  const dd = String(d.getDate()).padStart(2, "0")
+  return `${y}-${m}-${dd}`
 }
-function getWeekDays(startAt: string) {
-  const start = new Date(startAt)
+
+function getWeekDays(startAt: string): Date[] {
+  // Parse as local date to avoid timezone shift
+  const [datePart] = startAt.split("T")
+  const [y, mo, day] = datePart.split("-").map(Number)
+  const start = new Date(y, mo - 1, day)
   return Array.from({ length: 7 }, (_, i) => {
     const d = new Date(start)
     d.setDate(start.getDate() + i)
     return d
   })
 }
+
 const DAY_LABELS = ["월", "화", "수", "목", "금", "토", "일"]
+
+interface SolvedProblemWithDate extends DailySolvedProblem {
+  date: string
+  dayLabel: string
+}
 
 export default function MyRecordPage() {
   const router = useRouter()
@@ -64,13 +92,18 @@ export default function MyRecordPage() {
       try {
         const [rec, w] = await Promise.all([
           recordService.getSummary(),
-          recordService.getWeeks(0, 10),
+          recordService.getWeeks(0, 20),
         ])
         setSummary(rec)
-        setWeeks(w.items)
 
-        if (w.items.length > 0) {
-          const current = w.items[0]
+        // Sort weeks by startAt descending so items[0] is the most recent
+        const sorted = [...w.items].sort(
+          (a, b) => new Date(b.startAt).getTime() - new Date(a.startAt).getTime()
+        )
+        setWeeks(sorted)
+
+        if (sorted.length > 0) {
+          const current = sorted[0]
           setCurrentChallenge(current)
 
           const prog = await recordService.getProgressSummary(current.challengeId)
@@ -78,11 +111,19 @@ export default function MyRecordPage() {
 
           const days = getWeekDays(current.startAt)
           const today = new Date()
-          const pastDays = days.filter(d => d <= today)
+          // Only fetch past days (up to and including today)
+          const pastDays = days.filter(d => {
+            const dDate = toYYYYMMDD(d)
+            const todayDate = toYYYYMMDD(today)
+            return dDate <= todayDate
+          })
+
           const entries = await Promise.all(
-            pastDays.map(d => recordService.getDailySolved(current.challengeId, toYYYYMMDD(d))
-              .then(r => [toYYYYMMDD(d), r.items] as [string, DailySolvedProblem[]])
-              .catch(() => [toYYYYMMDD(d), []] as [string, DailySolvedProblem[]]))
+            pastDays.map(d =>
+              recordService.getDailySolved(current.challengeId, toYYYYMMDD(d))
+                .then(r => [toYYYYMMDD(d), r.items] as [string, DailySolvedProblem[]])
+                .catch(() => [toYYYYMMDD(d), []] as [string, DailySolvedProblem[]])
+            )
           )
           setDailySolved(Object.fromEntries(entries))
         }
@@ -103,8 +144,21 @@ export default function MyRecordPage() {
     )
   }
 
-  const achievementPct = progress ? Math.round(progress.achievementRate * 100) : 0
-  const weekDays = currentChallenge ? getWeekDays(currentChallenge.startAt) : []
+  const achievementPct = progress ? Math.min(100, Math.round(progress.achievementRate * 100)) : 0
+  const weekDays: (Date | undefined)[] = currentChallenge
+    ? getWeekDays(currentChallenge.startAt)
+    : Array.from({ length: 7 }, () => undefined)
+
+  const allWeekProblems: SolvedProblemWithDate[] = currentChallenge
+    ? getWeekDays(currentChallenge.startAt)
+        .map((day, i) => {
+          const key = toYYYYMMDD(day)
+          const items = dailySolved[key] ?? []
+          return items.map(p => ({ ...p, date: key, dayLabel: DAY_LABELS[i] }))
+        })
+        .flat()
+        .reverse()
+    : []
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -120,7 +174,7 @@ export default function MyRecordPage() {
         <Sidebar />
         <main className="flex-1 flex flex-col min-h-screen">
           <div className="flex-1 p-4 md:p-8">
-          <div className="mx-auto max-w-7xl space-y-8">
+          <div className="mx-auto max-w-4xl space-y-8">
             <div>
               <h1 className="text-3xl font-bold text-balance">내 기록</h1>
               <p className="text-muted-foreground mt-2">이번 주 진행 상황과 활동 내역을 확인하세요</p>
@@ -128,12 +182,52 @@ export default function MyRecordPage() {
 
             {error && (
               <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive text-center">
-                {error} — 로그인이 필요합니다.
+                {error}
               </div>
             )}
 
-            {/* Current Challenge Status */}
-            {currentChallenge && progress && (
+            {/* ── Summary Cards (최상단) ─────────────────────────────────── */}
+            <div className="grid gap-4 md:grid-cols-3">
+              <Card className="hover:shadow-md transition-shadow">
+                <CardContent className="p-6 flex items-center gap-4">
+                  <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-blue-50 dark:bg-blue-950/30">
+                    <Calendar className="h-7 w-7 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">참여 주차</p>
+                    <div className="text-2xl font-bold">{weeks.length > 0 ? `${weeks.length}주` : "0주"}</div>
+                    <p className="text-xs text-muted-foreground">총 참여 횟수</p>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="hover:shadow-md transition-shadow">
+                <CardContent className="p-6 flex items-center gap-4">
+                  <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-yellow-50 dark:bg-yellow-950/30">
+                    <Trophy className="h-7 w-7 text-yellow-600 dark:text-yellow-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">최고 점수</p>
+                    <div className="text-2xl font-bold">{summary?.maxPoints ?? 0}</div>
+                    <p className="text-xs text-muted-foreground">역대 최고</p>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="hover:shadow-md transition-shadow">
+                <CardContent className="p-6 flex items-center gap-4">
+                  <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-sky-50 dark:bg-sky-950/30">
+                    <Target className="h-7 w-7 text-sky-600 dark:text-sky-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">총 해결 문제</p>
+                    <div className="text-2xl font-bold">{summary?.totalSolvedCount ?? 0}</div>
+                    <p className="text-xs text-muted-foreground">누적 문제 수</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* ── Current Challenge Status ──────────────────────────────── */}
+            {currentChallenge && progress ? (
               <Card className="overflow-hidden border-primary/30">
                 <div className="h-1.5 w-full bg-gradient-to-r from-blue-500 via-sky-400 to-blue-400" />
                 <CardHeader className="pb-4">
@@ -144,7 +238,7 @@ export default function MyRecordPage() {
                     </div>
                     <div className="rounded-2xl bg-primary/10 px-4 py-2 text-center">
                       <p className="font-mono text-2xl font-bold text-primary">
-                        {Math.ceil((new Date(currentChallenge.endAt).getTime() - Date.now()) / 86400000)}
+                        {Math.max(0, Math.ceil((new Date(currentChallenge.endAt).getTime() - Date.now()) / 86400000))}
                       </p>
                       <p className="text-xs text-muted-foreground">일 남음</p>
                     </div>
@@ -183,7 +277,6 @@ export default function MyRecordPage() {
                       </div>
                     </div>
                   </div>
-
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
                       <span className="font-medium text-foreground">목표 달성률</span>
@@ -197,123 +290,132 @@ export default function MyRecordPage() {
                   </div>
                 </CardContent>
               </Card>
+            ) : (
+              <Card className="overflow-hidden border-dashed border-border">
+                <div className="h-1.5 w-full bg-muted" />
+                <CardContent className="py-10 flex flex-col items-center gap-3 text-center">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-muted">
+                    <Trophy className="h-7 w-7 text-muted-foreground" />
+                  </div>
+                  <p className="font-semibold text-foreground/70">현재 진행 중인 챌린지가 없습니다</p>
+                  <p className="text-sm text-muted-foreground">챌린지가 시작되면 여기서 진행 상황을 확인할 수 있어요</p>
+                </CardContent>
+              </Card>
             )}
 
-            {/* Daily Progress */}
-            {currentChallenge && weekDays.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>일일 진행 상황</CardTitle>
-                  <CardDescription>이번 주 날짜별 문제 풀이 기록</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-7 gap-2">
-                    {weekDays.map((day, i) => {
-                      const key = toYYYYMMDD(day)
-                      const items = dailySolved[key]
-                      const solved = items?.length ?? null
-                      const score = items?.reduce((s, p) => s + (TIER_SCORES[p.level] ?? 0), 0) ?? null
-                      const isPast = day <= new Date()
-                      const hasData = solved !== null
+            {/* ── Daily Progress ────────────────────────────────────────── */}
+            <Card>
+              <CardHeader>
+                <CardTitle>일일 진행 상황</CardTitle>
+                <CardDescription>이번 주 날짜별 문제 풀이 기록</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-7 gap-2">
+                  {DAY_LABELS.map((label, i) => {
+                    const day = weekDays[i]
+                    const key = day ? toYYYYMMDD(day) : null
+                    const items = key != null ? (dailySolved[key] ?? null) : null
+                    const solved = items?.length ?? null
+                    const score = items?.reduce((s, p) => s + (TIER_SCORES[p.level] ?? 0), 0) ?? null
+                    const isPast = day ? toYYYYMMDD(day) <= toYYYYMMDD(new Date()) : false
+                    const hasData = solved !== null
+                    return (
+                      <div
+                        key={i}
+                        className={`rounded-lg border p-3 text-center ${
+                          hasData && solved! > 0
+                            ? "border-primary/50 bg-primary/10"
+                            : isPast && currentChallenge
+                            ? "border-border bg-muted/30"
+                            : "border-dashed border-border bg-transparent opacity-40"
+                        }`}
+                      >
+                        <p className="text-xs font-medium text-muted-foreground mb-2">{label}</p>
+                        <p className="text-2xl font-bold font-mono">{hasData ? solved : "—"}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{hasData ? `${score}점` : ""}</p>
+                      </div>
+                    )
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* ── 이번 주 해결한 문제 ───────────────────────────────────── */}
+            <Card>
+              <CardHeader>
+                <CardTitle>이번 주 해결한 문제</CardTitle>
+                <CardDescription>
+                  {allWeekProblems.length > 0
+                    ? `이번 챌린지 기간 동안 풀이한 문제 목록 (${allWeekProblems.length}문제)`
+                    : "아직 풀이한 문제가 없습니다"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {allWeekProblems.length === 0 ? (
+                  <div className="flex flex-col items-center gap-3 py-8 text-center">
+                    <FileQuestion className="h-10 w-10 text-muted-foreground/40" />
+                    <p className="text-sm text-muted-foreground">
+                      {currentChallenge
+                        ? "이번 주 아직 풀이한 문제가 없어요. 오늘 첫 번째 문제를 풀어보세요!"
+                        : "참여 중인 챌린지가 없습니다."}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {allWeekProblems.map((p, idx) => {
+                      const tierLabel = LEVEL_LABELS[p.level] ?? `Lv.${p.level}`
+                      const tierColor = getTierColor(tierLabel)
                       return (
-                        <div key={i} className={`rounded-lg border p-3 text-center ${hasData && solved! > 0 ? "border-primary/50 bg-primary/10" : isPast ? "border-border bg-muted/30" : "border-dashed border-border bg-transparent opacity-50"}`}>
-                          <p className="text-xs font-medium text-muted-foreground mb-2">{DAY_LABELS[i]}</p>
-                          <p className="text-2xl font-bold font-mono">{hasData ? solved : "—"}</p>
-                          <p className="text-xs text-muted-foreground mt-1">{hasData ? `${score}점` : ""}</p>
-                        </div>
+                        <a
+                          key={`${p.problemId}-${idx}`}
+                          href={`https://www.acmicpc.net/problem/${p.problemId}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors group"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <Badge variant="secondary" className="font-mono flex-shrink-0">{p.problemId}</Badge>
+                            <div className="min-w-0">
+                              <span className="font-medium group-hover:text-primary transition-colors truncate block">{p.titleKo}</span>
+                              <span className="text-xs text-muted-foreground">{p.dayLabel}요일</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 flex-shrink-0 ml-3">
+                            <Badge className={`text-xs font-medium ${tierColor}`} variant="outline">{tierLabel}</Badge>
+                            <span className="font-mono font-bold text-sm">{TIER_SCORES[p.level] ?? 0}점</span>
+                          </div>
+                        </a>
                       )
                     })}
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                )}
+              </CardContent>
+            </Card>
 
-            {/* Recent Solved Problems (today) */}
-            {currentChallenge && (() => {
-              const todayKey = toYYYYMMDD(new Date())
-              const todayItems = dailySolved[todayKey]
-              if (!todayItems || todayItems.length === 0) return null
-              return (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>오늘 해결한 문제</CardTitle>
-                    <CardDescription>{todayItems.length}문제</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {todayItems.map((p) => (
-                        <a key={p.problemId} href={`https://www.acmicpc.net/problem/${p.problemId}`} target="_blank" rel="noreferrer"
-                          className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
-                          <div className="flex items-center gap-3">
-                            <Badge variant="secondary" className="font-mono">{p.problemId}</Badge>
-                            <span className="font-medium">{p.titleKo}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Badge>{LEVEL_LABELS[p.level] ?? `Lv.${p.level}`}</Badge>
-                            <span className="font-mono font-bold">{TIER_SCORES[p.level] ?? 0}점</span>
-                          </div>
-                        </a>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )
-            })()}
-
-            {/* Summary Cards */}
-            <div className="grid gap-4 md:grid-cols-3">
-              <Card className="hover:shadow-md transition-shadow">
-                <CardContent className="p-6 flex items-center gap-4">
-                  <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-blue-50 dark:bg-blue-950/30">
-                    <Calendar className="h-7 w-7 text-blue-600 dark:text-blue-400" />
+            {/* ── Weekly History ────────────────────────────────────────── */}
+            <Card>
+              <CardHeader>
+                <CardTitle>지난 주간 활동 내역</CardTitle>
+                <CardDescription>최근 참여한 챌린지 기록</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {weeks.length === 0 ? (
+                  <div className="flex flex-col items-center gap-3 py-8 text-center">
+                    <Calendar className="h-10 w-10 text-muted-foreground/40" />
+                    <p className="text-sm text-muted-foreground">
+                      아직 참여한 챌린지가 없습니다.<br />첫 번째 챌린지에 참여해 보세요!
+                    </p>
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">참여 주차</p>
-                    <div className="text-2xl font-bold">{weeks.length}주</div>
-                    <p className="text-xs text-muted-foreground">총 참여 횟수</p>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card className="hover:shadow-md transition-shadow">
-                <CardContent className="p-6 flex items-center gap-4">
-                  <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-yellow-50 dark:bg-yellow-950/30">
-                    <Trophy className="h-7 w-7 text-yellow-600 dark:text-yellow-400" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">최고 점수</p>
-                    <div className="text-2xl font-bold">{summary?.maxPoints ?? "—"}</div>
-                    <p className="text-xs text-muted-foreground">역대 최고</p>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card className="hover:shadow-md transition-shadow">
-                <CardContent className="p-6 flex items-center gap-4">
-                  <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-sky-50 dark:bg-sky-950/30">
-                    <Target className="h-7 w-7 text-sky-600 dark:text-sky-400" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">총 해결 문제</p>
-                    <div className="text-2xl font-bold">{summary?.totalSolvedCount ?? "—"}</div>
-                    <p className="text-xs text-muted-foreground">누적 문제 수</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Weekly History */}
-            {weeks.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>주간 활동 내역</CardTitle>
-                  <CardDescription>최근 참여한 챌린지 기록</CardDescription>
-                </CardHeader>
-                <CardContent>
+                ) : (
                   <div className="space-y-4">
                     {weeks.map((w) => (
-                      <div key={w.challengeId} className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors">
+                      <div
+                        key={w.challengeId}
+                        className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors"
+                      >
                         <div className="flex items-center gap-4">
-                          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-lg">
-                            {w.rank}
+                          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-lg flex-shrink-0">
+                            {w.rank ?? "—"}
                           </div>
                           <div>
                             <p className="font-medium font-mono">{w.title}</p>
@@ -323,15 +425,15 @@ export default function MyRecordPage() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="text-xl font-bold font-mono">{w.score}</p>
+                          <p className="text-xl font-bold font-mono">{w.totalPoints ?? 0}</p>
                           <p className="text-sm text-muted-foreground">점</p>
                         </div>
                       </div>
                     ))}
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                )}
+              </CardContent>
+            </Card>
           </div>
           </div>
           <Footer />

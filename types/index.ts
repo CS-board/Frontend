@@ -30,7 +30,8 @@ export interface ChallengeRankingItem {
   bojId: string
   department: string
   grade: number
-  score: number
+  totalPoints: number
+  solvedCount: number
 }
 
 export interface ChallengeRankingResponse {
@@ -65,7 +66,7 @@ export interface MyRecordWeekItem {
   startAt: string
   endAt: string
   rank: number
-  score: number
+  totalPoints: number
   solvedCount: number
 }
 
@@ -154,6 +155,18 @@ export interface QuestionDetail {
   commentCount: number
   likeCount: number
   comments: CommentResponse[]
+}
+
+// ─── User Profile ─────────────────────────────────────────────────────────────
+
+export interface UserProfileDetail {
+  name: string
+  studentId: string
+  department: string
+  grade: number
+  email: string
+  bojId: string
+  goalPoints: number
 }
 
 // ─── Common ───────────────────────────────────────────────────────────────────
