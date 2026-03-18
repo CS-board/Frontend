@@ -1,14 +1,15 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
-import { Menu, X, Home, HelpCircle, Trophy, Settings, BarChart3, Newspaper, LogIn, UserPlus, LogOut } from "lucide-react"
+import { Menu, X, Home, HelpCircle, Trophy, Settings, BarChart3, Newspaper, LogIn, UserPlus, LogOut, User } from "lucide-react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/hooks/use-auth"
 import { authService } from "@/services/auth"
+import { userService } from "@/services/user"
 import { TOKEN_KEY } from "@/constants"
 
 const navItems = [
@@ -16,7 +17,7 @@ const navItems = [
   { icon: Trophy, label: "랭킹", href: "/ranking" },
   { icon: BarChart3, label: "내 기록", href: "/my-record" },
   { icon: HelpCircle, label: "백준 Q&A", href: "/qna" },
-  { icon: Newspaper, label: "게시판", href: "/board" },
+  { icon: Newspaper, label: "공지사항", href: "/board" },
   { icon: Settings, label: "설정", href: "/settings" },
 ]
 
@@ -25,8 +26,28 @@ export function MobileMenu() {
   const pathname = usePathname()
   const router = useRouter()
   const { user, isLoggedIn, loading } = useAuth()
-  const displayName = user?.name ?? user?.sub?.split("@")[0] ?? "사용자"
-  const displayId = user?.studentId ?? user?.sub ?? ""
+
+  const [profileName, setProfileName] = useState<string | null>(null)
+  const [profileSub, setProfileSub] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!isLoggedIn) return
+    userService.getDetail()
+      .then(d => {
+        setProfileName(d.name || null)
+        const dept = d.department ?? ""
+        const grade = d.grade ? `${d.grade}학년` : ""
+        setProfileSub([dept, grade].filter(Boolean).join(" ") || null)
+      })
+      .catch(() => {
+        const dept = user?.department ?? ""
+        const grade = user?.grade ? `${user.grade}학년` : ""
+        const sub = [dept, grade].filter(Boolean).join(" ")
+        setProfileSub(sub || user?.studentId || user?.sub || null)
+      })
+  }, [isLoggedIn]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const displayName = profileName ?? user?.name ?? user?.sub?.split("@")[0] ?? "사용자"
 
   const handleLogout = async () => {
     try { await authService.logout() } catch {/* ignore */}
@@ -70,12 +91,14 @@ export function MobileMenu() {
               <div className="h-16 rounded-lg bg-muted animate-pulse" />
             ) : isLoggedIn ? (
               <Link href="/settings" onClick={() => setIsOpen(false)} className="flex items-center gap-3 rounded-lg bg-muted p-3 hover:bg-muted/70 transition-colors">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-mono font-bold flex-shrink-0">
-                  {displayName.charAt(0)}
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary flex-shrink-0">
+                  <User className="h-4 w-4" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="truncate font-medium">{displayName}</div>
-                  <div className="truncate text-sm text-muted-foreground">{displayId}</div>
+                  <div className="truncate font-semibold text-sm">{displayName}</div>
+                  <div className="truncate text-xs text-muted-foreground">
+                    {profileSub ?? ""}
+                  </div>
                 </div>
               </Link>
             ) : (

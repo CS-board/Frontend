@@ -1,27 +1,49 @@
 "use client"
 
 import Image from "next/image"
-import { Home, HelpCircle, Trophy, Settings, BarChart3, Newspaper, LogIn, UserPlus } from "lucide-react"
+import { Home, HelpCircle, Trophy, Settings, BarChart3, Newspaper, LogIn, UserPlus, User } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/hooks/use-auth"
 import { Button } from "@/components/ui/button"
+import { userService } from "@/services/user"
 
 const navItems = [
   { icon: Home, label: "홈", href: "/" },
   { icon: Trophy, label: "랭킹", href: "/ranking" },
   { icon: BarChart3, label: "내 기록", href: "/my-record" },
   { icon: HelpCircle, label: "백준 Q&A", href: "/qna" },
-  { icon: Newspaper, label: "게시판", href: "/board" },
+  { icon: Newspaper, label: "공지사항", href: "/board" },
   { icon: Settings, label: "설정", href: "/settings" },
 ]
 
 export function Sidebar() {
   const pathname = usePathname()
   const { user, isLoggedIn, loading } = useAuth()
-  const displayName = user?.name ?? user?.sub?.split("@")[0] ?? "사용자"
-  const displayId = user?.studentId ?? user?.sub ?? ""
+
+  const [profileName, setProfileName] = useState<string | null>(null)
+  const [profileSub, setProfileSub] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!isLoggedIn) return
+    userService.getDetail()
+      .then(d => {
+        setProfileName(d.name || null)
+        const dept = d.department ?? ""
+        const grade = d.grade ? `${d.grade}학년` : ""
+        setProfileSub([dept, grade].filter(Boolean).join(" ") || null)
+      })
+      .catch(() => {
+        const dept = user?.department ?? ""
+        const grade = user?.grade ? `${user.grade}학년` : ""
+        const sub = [dept, grade].filter(Boolean).join(" ")
+        setProfileSub(sub || user?.studentId || user?.sub || null)
+      })
+  }, [isLoggedIn]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const displayName = profileName ?? user?.name ?? user?.sub?.split("@")[0] ?? "사용자"
 
   return (
     <aside className="sticky top-0 hidden h-screen w-64 border-r border-border bg-sidebar md:block">
@@ -65,12 +87,14 @@ export function Sidebar() {
             <div className="h-16 rounded-lg bg-sidebar-accent/30 animate-pulse" />
           ) : isLoggedIn ? (
             <Link href="/settings" className="flex items-center gap-3 rounded-lg bg-sidebar-accent p-3 hover:bg-sidebar-accent/70 transition-colors">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-sidebar-primary text-sidebar-primary-foreground font-mono font-bold flex-shrink-0">
-                {displayName.charAt(0)}
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sidebar-primary/20 text-sidebar-primary flex-shrink-0">
+                <User className="h-4 w-4" />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="truncate text-sm font-medium text-sidebar-foreground">{displayName}</div>
-                <div className="truncate text-xs text-sidebar-foreground/60">{displayId}</div>
+                <div className="truncate text-sm font-semibold text-sidebar-foreground">{displayName}</div>
+                <div className="truncate text-xs text-sidebar-foreground/60">
+                  {profileSub ?? <span className="inline-block w-20 h-3 rounded bg-sidebar-foreground/10 animate-pulse" />}
+                </div>
               </div>
             </Link>
           ) : (

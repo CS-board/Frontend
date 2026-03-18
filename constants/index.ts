@@ -37,6 +37,11 @@ export const API_ENDPOINTS = {
     DAILY_SOLVED: (challengeId: number) => `/me/records/${challengeId}/solved-problems`,
     GOAL_POINTS: '/users/me/goal-points',
   },
+  USERS: {
+    ME_DETAIL: '/users/me/detail',
+    GRADE: '/users/me/grade',
+    DEPARTMENT: '/users/me/department',
+  },
   BOARD: {
     LIST: '/board/posts',
     DETAIL: (id: number) => `/board/posts/${id}`,
