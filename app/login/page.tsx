@@ -45,6 +45,9 @@ export default function LoginPage() {
     try {
       const res = await authService.login(data)
       localStorage.setItem(TOKEN_KEY, res.token)
+      // Schedule proactive AT refresh before expiry
+      const { apiClient } = await import("@/api/client")
+      apiClient.scheduleProactiveRefresh(res.token)
       router.push("/")
     } catch (e) {
       setSubmitError(e instanceof Error ? e.message : "로그인에 실패했습니다. 다시 시도해주세요")
