@@ -38,42 +38,38 @@
 - **App Router** 기반 페이지 구조 (`app/` 디렉터리)
 - **서비스 레이어** 분리 (`services/`) — API 호출 로직을 뷰와 독립적으로 관리
 - **타입 중앙 관리** (`types/index.ts`) — 공통 응답 타입 및 도메인 타입 정의
-- **API 클라이언트** (`api/client.ts`) — JWT 토큰 자동 첨부 및 에러 처리
+- **API 클라이언트** (`api/client.ts`) — JWT(Access Token) 자동 첨부, 만료 전·401 시 갱신(Refresh Token 쿠키)
+
+상세한 폴더 설명·인수인계·포트폴리오 점검은 [`docs/프로젝트구조.md`](./docs/프로젝트구조.md) 참고.
 
 ---
 
 ## 📁 프로젝트 구조
 
 ```
-cs-board/
-├── app/                      # Next.js App Router 페이지
-│   ├── page.tsx              # 홈 (desktop/mobile 분기 렌더링)
+Frontend/
+├── app/                      # Next.js App Router (URL = 폴더)
+│   ├── page.tsx              # 홈 (데스크톱/모바일 분기)
 │   ├── ranking/              # 주간 랭킹
 │   ├── my-record/            # 내 기록
-│   ├── qna/                  # Q&A 게시판
-│   ├── board/                # 공지 게시판
-│   ├── login/                # 로그인
-│   ├── signup/               # 회원가입
-│   ├── forgot-password/      # 비밀번호 재설정
-│   └── settings/             # 설정
+│   ├── qna/                  # Q&A
+│   ├── board/                # 공지
+│   ├── login/ | signup/      # 인증
+│   ├── forgot-password/      # 비로그인 비밀번호 찾기
+│   ├── change-password/      # 로그인 상태 비밀번호 변경
+│   └── settings/             # 프로필·목표점수·탈퇴 등
 │
 ├── components/
-│   ├── features/             # 도메인 컴포넌트 (Sidebar, Footer, Home 등)
-│   └── ui/                   # 공통 UI 컴포넌트 (shadcn/ui 기반)
+│   ├── features/             # 도메인 UI (사이드바, 홈, 푸터 등)
+│   └── ui/                   # shadcn/ui 공통 컴포넌트
 │
-├── services/                 # API 호출 서비스 레이어
-│   ├── auth.ts               # 인증 (로그인·회원가입·비밀번호 재설정)
-│   ├── challenge.ts          # 챌린지 정보·랭킹
-│   ├── record.ts             # 개인 기록
-│   ├── qna.ts                # Q&A
-│   └── board.ts              # 게시판
+├── services/                 # API 전용 (뷰와 분리)
+│   ├── auth.ts | user.ts | challenge.ts | record.ts | board.ts | qna.ts
+│   └── ranking.ts            # (백엔드에 경로 있을 때용, 우선 challenge 사용)
 │
-├── api/
-│   └── client.ts             # HTTP 클라이언트 (JWT, 에러 핸들링)
-│
-├── types/index.ts            # 공통 타입 정의
-├── constants/index.ts        # API 엔드포인트, 라우트 상수
-└── hooks/                    # 커스텀 훅 (use-auth, use-mobile 등)
+├── api/client.ts             # fetch 래퍼 + 토큰 갱신
+├── types/ | constants/ | hooks/ | lib/
+└── docs/프로젝트구조.md      # 구조·인수인계·포폴 점검
 ```
 
 ---
@@ -89,7 +85,7 @@ cs-board/
 ```bash
 # 저장소 클론
 git clone <repository-url>
-cd cs-board
+cd Frontend
 
 # 의존성 설치
 npm install
