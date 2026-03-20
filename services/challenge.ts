@@ -1,3 +1,4 @@
+/** 챌린지 요약/상세/랭킹 페이지네이션 */
 import { apiClient } from '@/api/client'
 import { API_ENDPOINTS } from '@/constants'
 import type { ApiResponse, ChallengeSummary, ChallengeDetails, ChallengeRankingResponse } from '@/types'

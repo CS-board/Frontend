@@ -1,3 +1,4 @@
+/** 라우트 경로·API 경로(prefix는 NEXT_PUBLIC_API_BASE_URL 뒤에 붙음)·토큰 키 */
 export const ROUTES = {
   HOME: '/',
   LOGIN: '/login',
@@ -7,6 +8,7 @@ export const ROUTES = {
   QNA: '/qna',
   BOARD: '/board',
   SETTINGS: '/settings',
+  CHANGE_PASSWORD: '/change-password',
 } as const
 
 export const API_ENDPOINTS = {
@@ -27,8 +29,8 @@ export const API_ENDPOINTS = {
   },
   CHALLENGES: {
     RANKINGS: (id: number) => `/challenges/${id}/rankings`,
-    INFO_SUMMARY: (id: number) => `/challenges/${id}/info/summary`,
-    INFO_DETAILS: (id: number) => `/challenges/${id}/info/details`,
+    INFO_SUMMARY: (id: number) => `/challenges/${id}/details`,
+    INFO_DETAILS: (id: number) => `/challenges/${id}/details`,
   },
   ME: {
     SUMMARY: '/me/records/summary',
@@ -41,6 +43,7 @@ export const API_ENDPOINTS = {
     ME_DETAIL: '/users/me/detail',
     GRADE: '/users/me/grade',
     DEPARTMENT: '/users/me/department',
+    WITHDRAW: '/users/me',
   },
   BOARD: {
     LIST: '/board/posts',

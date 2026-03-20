@@ -1,3 +1,4 @@
+/** 프로필 조회·학년/학과·회원탈퇴 */
 import { apiClient } from '@/api/client'
 import { API_ENDPOINTS } from '@/constants'
 import type { ApiResponse, UserProfileDetail } from '@/types'
@@ -22,5 +23,9 @@ export const userService = {
       { department }
     )
     return res.data
+  },
+
+  async withdraw(): Promise<void> {
+    await apiClient.delete(API_ENDPOINTS.USERS.WITHDRAW)
   },
 }
