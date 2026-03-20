@@ -1,5 +1,6 @@
 import * as React from 'react'
 
+/** `constants/index.ts`의 MOBILE_BREAKPOINT와 동일하게 유지 */
 const MOBILE_BREAKPOINT = 768
 
 export function useIsMobile() {

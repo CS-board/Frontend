@@ -1,6 +1,6 @@
 'use client'
 
-// Inspired by react-hot-toast library
+/** shadcn 토스트 상태(리듀서). 원본: react-hot-toast 패턴 */
 import * as React from 'react'
 
 import type { ToastActionElement, ToastProps } from '@/components/ui/toast'
@@ -90,8 +90,6 @@ export const reducer = (state: State, action: Action): State => {
     case 'DISMISS_TOAST': {
       const { toastId } = action
 
-      // ! Side effects ! - This could be extracted into a dismissToast() action,
-      // but I'll keep it here for simplicity
       if (toastId) {
         addToRemoveQueue(toastId)
       } else {

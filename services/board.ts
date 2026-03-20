@@ -1,3 +1,4 @@
+/** 공지 목록·상세 */
 import { apiClient } from '@/api/client'
 import { API_ENDPOINTS } from '@/constants'
 import type { ApiResponse, BoardPostListResponse, BoardPostDetail } from '@/types'

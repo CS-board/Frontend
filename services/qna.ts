@@ -1,3 +1,4 @@
+/** Q&A 질문·댓글·좋아요·해결 */
 import { apiClient } from '@/api/client'
 import { API_ENDPOINTS } from '@/constants'
 import type { ApiResponse, QuestionListResponse, QuestionDetail } from '@/types'

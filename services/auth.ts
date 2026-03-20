@@ -1,8 +1,7 @@
+/** 인증·회원가입·비밀번호 재설정 API 래퍼 */
 import { apiClient } from '@/api/client'
 import { API_ENDPOINTS } from '@/constants'
 import type { LoginResponse, ApiResponse } from '@/types'
-
-// ─── Request Types ────────────────────────────────────────────────────────────
 
 export interface SignupRequest {
   username: string      // @kumoh.ac.kr 이메일
@@ -18,8 +17,6 @@ export interface LoginRequest {
   username: string
   password: string
 }
-
-// ─── Auth Service ─────────────────────────────────────────────────────────────
 
 export const authService = {
   async getDepartments(): Promise<string[]> {
@@ -63,8 +60,6 @@ export const authService = {
     const res = await apiClient.post<ApiResponse<LoginResponse>>(API_ENDPOINTS.AUTH.REFRESH)
     return res.data
   },
-
-  // ─── 비밀번호 재설정 ───────────────────────────────────────────────────────
 
   async sendPasswordResetMail(username: string): Promise<void> {
     await apiClient.post(API_ENDPOINTS.AUTH.PASSWORD_MAIL, { username })

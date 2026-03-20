@@ -1,3 +1,4 @@
+/** 내 기록 요약·주차·진행·일별 풀이·목표점수 */
 import { apiClient } from '@/api/client'
 import { API_ENDPOINTS } from '@/constants'
 import type {

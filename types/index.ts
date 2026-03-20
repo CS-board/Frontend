@@ -1,12 +1,12 @@
-// ─── Auth ───────────────────────────────────────────────────────────────────
+/** 백엔드 API 응답·도메인 타입 모음 */
 
+/** 로그인 */
 export interface LoginResponse {
   token: string
   expiredIn: string
 }
 
-// ─── Challenge ───────────────────────────────────────────────────────────────
-
+/** 챌린지·랭킹 */
 export type ChallengeStatus = "SCHEDULED" | "ACTIVE" | "CLOSED"
 
 export interface ChallengeSummary {
@@ -45,8 +45,7 @@ export interface ChallengeRankingResponse {
   items: ChallengeRankingItem[]
 }
 
-// ─── Me Record ───────────────────────────────────────────────────────────────
-
+/** 내 기록(/me/records) */
 export interface MyProgressSummary {
   currentRank: number
   currentScore: number
@@ -89,8 +88,7 @@ export interface DailySolvedResponse {
   items: DailySolvedProblem[]
 }
 
-// ─── Board ───────────────────────────────────────────────────────────────────
-
+/** 공지 게시판 */
 export interface BoardPostListItem {
   id: number
   title: string
@@ -114,8 +112,7 @@ export interface BoardPostDetail {
   createdAt: string
 }
 
-// ─── QnA ─────────────────────────────────────────────────────────────────────
-
+/** Q&A */
 export interface QuestionSummary {
   id: number
   title: string
@@ -157,8 +154,7 @@ export interface QuestionDetail {
   comments: CommentResponse[]
 }
 
-// ─── User Profile ─────────────────────────────────────────────────────────────
-
+/** 설정·프로필 */
 export interface UserProfileDetail {
   name: string
   studentId: string
@@ -169,8 +165,7 @@ export interface UserProfileDetail {
   goalPoints: number
 }
 
-// ─── Common ───────────────────────────────────────────────────────────────────
-
+/** 공통 래퍼 */
 export interface ApiResponse<T> {
   success: string
   data: T

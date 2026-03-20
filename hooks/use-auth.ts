@@ -1,5 +1,6 @@
 "use client"
 
+/** 앱 최초 로드 시 localStorage AT로 로그인 여부·JWT 클레임 표시. 만료 시 조용히 refresh 시도. */
 import { useEffect, useState } from "react"
 import { TOKEN_KEY } from "@/constants"
 
@@ -42,7 +43,6 @@ export function useAuth() {
 
     const now = Math.floor(Date.now() / 1000)
 
-    // Token still valid — use it immediately
     if (!claims.exp || claims.exp > now) {
       setUser(claims)
       setIsLoggedIn(true)
@@ -50,14 +50,13 @@ export function useAuth() {
       return
     }
 
-    // AT is expired — silently try to refresh before giving up
+    // AT 만료: refresh만 시도(실패 시 로그아웃 처리)
     fetch(`${API_BASE_URL}/auth/refresh`, {
       method: "POST",
       credentials: "include",
     })
       .then(async (res) => {
         if (!res.ok) {
-          // 401/403: RT is also dead — clear and stay logged out
           localStorage.removeItem(TOKEN_KEY)
           return
         }
@@ -72,7 +71,6 @@ export function useAuth() {
           const newClaims = parseTokenClaims(newToken)
           setUser(newClaims)
           setIsLoggedIn(true)
-          // Tell apiClient to schedule the next proactive refresh
           import("@/api/client").then(({ apiClient }) => {
             apiClient.scheduleProactiveRefresh(newToken)
           })
@@ -81,8 +79,7 @@ export function useAuth() {
         }
       })
       .catch(() => {
-        // Network error — don't clear the token; let next API call retry
-        // Show as logged in with existing (stale) claims so UI is not disrupted
+        // 네트워크 오류: 토큰 유지, 다음 API에서 apiClient가 재시도
         setUser(claims)
         setIsLoggedIn(true)
       })
