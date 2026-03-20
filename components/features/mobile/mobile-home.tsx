@@ -1,5 +1,6 @@
 "use client"
 
+/** 모바일 홈: 풀스크롤 섹션 + 스크롤 페이드 */
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
@@ -45,7 +46,6 @@ export function MobileHome() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Section 1: Hero */}
       <section
         className="flex min-h-screen flex-col items-center justify-center px-6 text-center"
         style={{ opacity: section1Opacity }}
@@ -86,7 +86,6 @@ export function MobileHome() {
         </div>
       </section>
 
-      {/* Section 2: Challenge Info */}
       <section
         className="flex min-h-screen flex-col items-center justify-center px-6"
         style={{ opacity: section2Opacity }}
@@ -115,7 +114,6 @@ export function MobileHome() {
         </div>
       </section>
 
-      {/* Section 3: Schedule */}
       <section
         className="flex min-h-screen flex-col items-center justify-center px-6"
         style={{ opacity: section3Opacity }}
@@ -158,7 +156,6 @@ export function MobileHome() {
         </Link>
       </section>
 
-      {/* Section 4: Scoring System */}
       <section className="min-h-screen px-6 py-20" style={{ opacity: section4Opacity }}>
         <div className="mb-10 text-center">
           <Badge variant="outline" className="mb-6 font-mono">점수 가산 방식</Badge>
@@ -193,7 +190,6 @@ export function MobileHome() {
         </p>
       </section>
 
-      {/* Section 5: Community */}
       <section className="min-h-screen px-6 py-20" style={{ opacity: section5Opacity }}>
         <div className="mx-auto max-w-md space-y-8 text-center">
           <Badge variant="outline" className="mb-6 font-mono">커뮤니티</Badge>

@@ -1,5 +1,6 @@
 "use client"
 
+/** 데스크톱 좌측 고정 네비 + 로그인 시 프로필 요약 */
 import Image from "next/image"
 import { Home, HelpCircle, Trophy, Settings, BarChart3, Newspaper, LogIn, UserPlus, User } from "lucide-react"
 import Link from "next/link"
@@ -48,7 +49,6 @@ export function Sidebar() {
   return (
     <aside className="sticky top-0 hidden h-screen w-64 border-r border-border bg-sidebar md:block">
       <div className="flex h-full flex-col">
-        {/* Logo */}
         <Link href="/" className="flex items-center gap-3 border-b border-sidebar-border px-6 py-5 hover:opacity-80 transition-opacity">
           <Image src="/logo.png" alt="CHIP_SAT" width={40} height={40} className="rounded-lg" />
           <div>
@@ -57,7 +57,6 @@ export function Sidebar() {
           </div>
         </Link>
 
-        {/* Navigation */}
         <nav className="flex-1 space-y-1 p-4">
           {navItems.map((item) => {
             const Icon = item.icon
@@ -81,7 +80,6 @@ export function Sidebar() {
           })}
         </nav>
 
-        {/* User Info */}
         <div className="border-t border-sidebar-border p-4">
           {loading ? (
             <div className="h-16 rounded-lg bg-sidebar-accent/30 animate-pulse" />

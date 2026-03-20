@@ -1,3 +1,4 @@
+/** (선택) 랜딩용 배너 — 현재 홈은 desktop/mobile-home 위주 */
 import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
 import Link from "next/link"
@@ -33,7 +34,6 @@ export function MainBanner() {
             </Button>
           </div>
 
-          {/* Stats */}
           <div className="mt-12 grid grid-cols-3 gap-4 md:gap-8">
             <div className="rounded-lg border border-border bg-background p-4">
               <div className="font-mono text-2xl font-bold text-foreground md:text-3xl">142</div>
@@ -51,7 +51,6 @@ export function MainBanner() {
         </div>
       </div>
 
-      {/* Decorative Grid */}
       <div className="absolute inset-0 -z-10 opacity-[0.03]">
         <div
           className="absolute inset-0"

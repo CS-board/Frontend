@@ -1,5 +1,6 @@
 "use client"
 
+/** Q&A 단일 질문 상세(URL /qna/[id]) */
 import { useState, useEffect, useRef } from "react"
 import Image from "next/image"
 import Link from "next/link"
@@ -36,24 +37,20 @@ export default function QnaDetailPage() {
   const [liked, setLiked] = useState(false)
   const [likeCount, setLikeCount] = useState(0)
 
-  // comment form
   const [comment, setComment] = useState("")
   const [submitting, setSubmitting] = useState(false)
   const commentRef = useRef<HTMLTextAreaElement>(null)
 
-  // auth
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [myName, setMyName] = useState<string | null>(null)
   const [myAuthorId, setMyAuthorId] = useState<number | null>(null)
 
-  // question editing
   const [editingQuestion, setEditingQuestion] = useState(false)
   const [editTitle, setEditTitle] = useState("")
   const [editContent, setEditContent] = useState("")
   const [savingQuestion, setSavingQuestion] = useState(false)
   const [deletingQuestion, setDeletingQuestion] = useState(false)
 
-  // comment editing
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null)
   const [editCommentContent, setEditCommentContent] = useState("")
   const [savingComment, setSavingComment] = useState(false)
@@ -118,8 +115,6 @@ export default function QnaDetailPage() {
     }
   }
 
-  // ── Question edit/delete ──────────────────────────────────────────────────
-
   const startEditQuestion = () => {
     if (!question) return
     setEditTitle(question.title)
@@ -158,8 +153,6 @@ export default function QnaDetailPage() {
       setDeletingQuestion(false)
     }
   }
-
-  // ── Comment edit/delete ───────────────────────────────────────────────────
 
   const startEditComment = (commentId: number, content: string) => {
     setEditingCommentId(commentId)
@@ -225,7 +218,7 @@ export default function QnaDetailPage() {
               <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-6 text-center text-destructive">{error}</div>
             ) : question ? (
               <>
-                {/* Question */}
+                {/* 질문 본문 */}
                 <Card>
                   <CardHeader className="space-y-3">
                     {editingQuestion ? (
@@ -305,7 +298,7 @@ export default function QnaDetailPage() {
                   )}
                 </Card>
 
-                {/* Comments */}
+                {/* 댓글 목록 */}
                 <div className="space-y-3">
                   <h2 className="text-lg font-semibold">댓글 {question.commentCount}개</h2>
                   {question.comments.map(c => (
@@ -357,7 +350,7 @@ export default function QnaDetailPage() {
                     </Card>
                   ))}
 
-                  {/* Comment Form */}
+                  {/* 댓글 작성 */}
                   {isLoggedIn ? (
                     <div className="flex gap-3 pt-2">
                       <textarea

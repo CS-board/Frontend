@@ -1,5 +1,6 @@
 "use client"
 
+/** 공지 목록: 아코디언으로 본문 로드 */
 import Image from "next/image"
 import { useState, useEffect } from "react"
 import { Sidebar } from "@/components/features/sidebar"
@@ -101,7 +102,7 @@ export default function BoardPage() {
 
                     return (
                       <div key={post.id} className={`rounded-lg border transition-colors ${post.pinned ? "border-primary/40" : "border-border"} ${isExpanded ? "bg-card shadow-sm" : "bg-card hover:bg-muted/40"}`}>
-                        {/* Header row */}
+                        {/* 제목 행 */}
                         <button
                           onClick={() => toggleExpand(post.id)}
                           className="w-full text-left px-4 py-4 flex items-center gap-3"
@@ -131,7 +132,7 @@ export default function BoardPage() {
                           </div>
                         </button>
 
-                        {/* Expanded content */}
+                        {/* 본문 */}
                         {isExpanded && (
                           <div className="border-t border-border px-4 pb-5 pt-4 space-y-2">
                             {isLoadingThis ? (

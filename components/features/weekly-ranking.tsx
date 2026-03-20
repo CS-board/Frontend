@@ -1,8 +1,8 @@
+/** 홈용 목업 랭킹(실데이터는 /ranking 페이지) */
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Trophy, Medal } from "lucide-react"
 
-// Mock data - Updated to use score instead of problem count
 const rankings = [
   { rank: 1, name: "김철수", studentId: "2021****", department: "컴퓨터공학과", score: 850, grade: 3 },
   { rank: 2, name: "이영희", studentId: "2022****", department: "소프트웨어공학과", score: 720, grade: 2 },
@@ -38,7 +38,6 @@ export function WeeklyRanking() {
                   user.rank <= 3 ? "border-primary/20 bg-primary/5" : "border-border"
                 }`}
               >
-                {/* Rank */}
                 <div className="flex w-12 items-center justify-center md:w-16">
                   {user.rank === 1 && <Trophy className="h-6 w-6 text-yellow-600 md:h-7 md:w-7" />}
                   {user.rank === 2 && <Medal className="h-6 w-6 text-gray-400 md:h-7 md:w-7" />}
@@ -48,7 +47,6 @@ export function WeeklyRanking() {
                   )}
                 </div>
 
-                {/* User Info */}
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-col gap-1 md:flex-row md:items-center md:gap-3">
                     <span className="truncate font-mono text-base font-semibold text-foreground md:text-lg">
@@ -72,7 +70,6 @@ export function WeeklyRanking() {
             ))}
           </div>
 
-          {/* Load More */}
           <div className="mt-6 text-center">
             <button className="font-mono text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
               더 보기

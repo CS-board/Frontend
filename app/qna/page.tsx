@@ -1,5 +1,6 @@
 "use client"
 
+/** Q&A 목록: 아코디언 + 상세 로드, 좋아요는 localStorage 보조 저장 */
 import Image from "next/image"
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
@@ -45,31 +46,26 @@ export default function QnaPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
 
-  // auth
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [myName, setMyName] = useState<string | null>(null)
   const [myAuthorId, setMyAuthorId] = useState<number | null>(null)
 
-  // accordion
   const [expandedId, setExpandedId] = useState<number | null>(null)
   const [detailCache, setDetailCache] = useState<Record<number, QuestionDetail>>({})
   const [loadingDetail, setLoadingDetail] = useState<number | null>(null)
   const [likeCountMap, setLikeCountMap] = useState<Record<number, number>>({})
   const [likedMap, setLikedMap] = useState<Record<number, boolean>>(() => loadLikesFromStorage())
 
-  // comment inputs
   const [commentInputs, setCommentInputs] = useState<Record<number, string>>({})
   const [submittingComment, setSubmittingComment] = useState<number | null>(null)
   const commentRefs = useRef<Record<number, HTMLTextAreaElement | null>>({})
 
-  // question edit/delete
   const [editingQuestionId, setEditingQuestionId] = useState<number | null>(null)
   const [editTitle, setEditTitle] = useState("")
   const [editContent, setEditContent] = useState("")
   const [savingQuestion, setSavingQuestion] = useState(false)
   const [deletingQuestionId, setDeletingQuestionId] = useState<number | null>(null)
 
-  // comment edit/delete
   const [editingComment, setEditingComment] = useState<{ qid: number; cid: number } | null>(null)
   const [editCommentContent, setEditCommentContent] = useState("")
   const [savingComment, setSavingComment] = useState(false)
@@ -85,7 +81,6 @@ export default function QnaPage() {
         setMyAuthorId(claims.id ?? claims.userId ?? null)
       }
     }
-    // Load persisted like states
     setLikedMap(loadLikesFromStorage())
   }, [])
 
@@ -127,7 +122,6 @@ export default function QnaPage() {
     (myAuthorId !== null && authorId === myAuthorId) ||
     (myName !== null && authorName === myName)
 
-  // ── Like ─────────────────────────────────────────────────────────────────
   const handleLike = async (qid: number) => {
     if (!isLoggedIn) return
     try {
@@ -141,7 +135,6 @@ export default function QnaPage() {
     } catch {/* ignore */}
   }
 
-  // ── Comment ───────────────────────────────────────────────────────────────
   const handleComment = async (qid: number) => {
     const text = (commentInputs[qid] ?? "").trim()
     if (!text || !isLoggedIn) return
@@ -154,7 +147,6 @@ export default function QnaPage() {
     finally { setSubmittingComment(null) }
   }
 
-  // ── Question edit/delete ──────────────────────────────────────────────────
   const startEditQuestion = (q: QuestionDetail) => {
     setEditingQuestionId(q.id)
     setEditTitle(q.title)
@@ -184,7 +176,6 @@ export default function QnaPage() {
     finally { setDeletingQuestionId(null) }
   }
 
-  // ── Comment edit/delete ───────────────────────────────────────────────────
   const startEditComment = (qid: number, cid: number, content: string) => {
     setEditingComment({ qid, cid })
     setEditCommentContent(content)
@@ -227,7 +218,7 @@ export default function QnaPage() {
           <div className="flex-1 p-4 md:p-8">
             <div className="mx-auto max-w-3xl space-y-6">
 
-              {/* Header */}
+              {/* 페이지 제목 */}
               <div className="flex items-center justify-between">
                 <div>
                   <h1 className="text-3xl font-bold">백준 Q&A</h1>
@@ -282,13 +273,13 @@ export default function QnaPage() {
                                 : "border-border hover:border-border/80 hover:shadow-sm"
                             }`}
                           >
-                            {/* ── Question header row ── */}
+                            {/* 질문 헤더(접힘 시) */}
                             <button
                               onClick={() => toggleExpand(q.id)}
                               className="w-full text-left px-5 py-4 flex items-start gap-3.5 bg-card hover:bg-muted/30 transition-colors"
                             >
                               <div className="flex-1 min-w-0">
-                                {/* Title + badges */}
+                                {/* 제목·뱃지 */}
                                 <div className="flex items-start gap-2 flex-wrap mb-1.5">
                                   <span className={`font-semibold text-base leading-snug ${isExpanded ? "text-primary" : "text-foreground"}`}>
                                     {q.title}
@@ -300,7 +291,7 @@ export default function QnaPage() {
                                   )}
                                 </div>
 
-                                {/* Meta row */}
+                                {/* 메타(작성자·시간) */}
                                 <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
                                   <span className="font-medium text-foreground/60">{q.authorName}</span>
                                   <span>·</span>
@@ -327,7 +318,7 @@ export default function QnaPage() {
                               </div>
                             </button>
 
-                            {/* ── Expanded panel ── */}
+                            {/* 펼침 패널 */}
                             {isExpanded && (
                               <div className="bg-card border-t border-border/60">
                                 {isLoadingThis ? (
@@ -336,7 +327,7 @@ export default function QnaPage() {
                                   </div>
                                 ) : detail ? (
                                   <>
-                                    {/* Question body */}
+                                    {/* 본문 영역 */}
                                     <div className="px-5 py-5">
                                       {isEditingThis ? (
                                         <div className="space-y-3">
@@ -364,14 +355,14 @@ export default function QnaPage() {
                                         </div>
                                       ) : (
                                         <>
-                                          {/* Content */}
+                                          {/* 내용 */}
                                           <div className="prose prose-sm dark:prose-invert max-w-none">
                                             <p className="whitespace-pre-wrap text-sm leading-7 text-foreground/90 m-0">
                                               {detail.content}
                                             </p>
                                           </div>
 
-                                          {/* Action bar */}
+                                          {/* 수정·삭제·해결 등 */}
                                           <div className="flex items-center justify-between mt-4 pt-4 border-t border-border/60">
                                             <div className="flex items-center gap-2">
                                               <button
@@ -425,7 +416,7 @@ export default function QnaPage() {
                                       )}
                                     </div>
 
-                                    {/* Comments section */}
+                                    {/* 댓글 */}
                                     <div className="border-t border-border/50 bg-muted/20">
                                       {detail.comments.filter(c => !c.deleted).length > 0 && (
                                         <div className="px-5 pt-4 pb-3 space-y-3">
@@ -497,7 +488,7 @@ export default function QnaPage() {
                                         </div>
                                       )}
 
-                                      {/* Comment input */}
+                                      {/* 댓글 입력 */}
                                       <div className="px-5 py-4">
                                         {isLoggedIn ? (
                                           <div className="flex gap-2 items-end">
@@ -542,7 +533,7 @@ export default function QnaPage() {
                     </div>
                   )}
 
-                  {/* Pagination */}
+                  {/* 페이지네이션 */}
                   {totalPages > 1 && (
                     <div className="flex items-center justify-center gap-2 pt-2">
                       <Button variant="outline" size="icon" onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}>

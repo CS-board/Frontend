@@ -1,5 +1,6 @@
 "use client"
 
+/** 로그인 — 성공 시 AT 저장 + 만료 전 갱신 스케줄 */
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -45,9 +46,8 @@ export default function LoginPage() {
     try {
       const res = await authService.login(data)
       localStorage.setItem(TOKEN_KEY, res.token)
-      // Schedule proactive AT refresh before expiry
       const { apiClient } = await import("@/api/client")
-      apiClient.scheduleProactiveRefresh(res.token)
+      apiClient.scheduleProactiveRefresh(res.token) // 만료 전 자동 갱신 타이머
       router.push("/")
     } catch (e) {
       setSubmitError(e instanceof Error ? e.message : "로그인에 실패했습니다. 다시 시도해주세요")

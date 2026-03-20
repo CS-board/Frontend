@@ -28,8 +28,8 @@ function formatDateTime(iso: string) {
 
 const CACHE_KEY = "chipsat_active_challenge_id"
 
+/** ACTIVE 시즌 id 탐색: sessionStorage 캐시 → 없으면 id 1~50 순차 조회 */
 async function findLatestChallengeId(): Promise<number> {
-  // Check sessionStorage cache first
   if (typeof window !== "undefined") {
     const cached = sessionStorage.getItem(CACHE_KEY)
     if (cached) {
@@ -37,23 +37,21 @@ async function findLatestChallengeId(): Promise<number> {
       try {
         const s = await challengeService.getSummary(cachedId)
         if (s?.status === "ACTIVE") return cachedId
-        // Cached one is CLOSED — check if there's a newer one right after
         try {
           const next = await challengeService.getSummary(cachedId + 1)
           if (next?.status === "ACTIVE" || next?.status === "SCHEDULED") {
             sessionStorage.setItem(CACHE_KEY, String(cachedId + 1))
             return cachedId + 1
           }
-        } catch { /* no newer challenge yet */ }
-        // Return the cached one (most recent, even if CLOSED)
+        } catch { /* 다음 시즌 없음 */ }
         return cachedId
-      } catch { /* cache is stale, do fresh scan */ }
+      } catch { /* 캐시 무효 → 아래 전체 스캔 */ }
     }
   }
 
-  // Fresh sequential scan — don't break on single errors, use consecutive counter
   let lastValid = 1
   let consecutiveErrors = 0
+  // 연속 3회 실패 시 중단(존재하지 않는 id 구간)
   for (let i = 1; i <= 50; i++) {
     try {
       const summary = await challengeService.getSummary(i)
@@ -167,7 +165,7 @@ export default function RankingPage() {
           <div className="flex-1 p-4 md:p-8">
           <div className="mx-auto max-w-7xl space-y-8">
 
-            {/* Header */}
+            {/* 상단: 시즌 제목·기간·이전/다음 시즌 */}
             <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
               <div>
                 {details && (
@@ -212,7 +210,7 @@ export default function RankingPage() {
               </div>
             )}
 
-            {/* Stats Cards */}
+            {/* 요약 카드 */}
             {!initializing && (
               <div className="grid gap-4 md:grid-cols-3">
                 <Card className="hover:shadow-md transition-shadow">
@@ -260,7 +258,7 @@ export default function RankingPage() {
               </div>
             )}
 
-            {/* Top 3 Podium */}
+            {/* 1~3위 포디엄 */}
             {!loading && !initializing && top3.length >= 3 && (
               <Card className="overflow-hidden">
                 <div className="h-1 w-full bg-gradient-to-r from-yellow-400 via-yellow-300 to-amber-400" />
@@ -273,7 +271,7 @@ export default function RankingPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-end justify-center gap-6 py-4">
-                    {/* 2nd */}
+                    {/* 2위 */}
                     <div className="flex flex-col items-center gap-2">
                       <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-600 shadow-md ring-4 ring-slate-200 dark:ring-slate-700">
                         <span className="font-mono text-2xl font-bold text-slate-600 dark:text-slate-300">2</span>
@@ -285,7 +283,7 @@ export default function RankingPage() {
                         <span className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate max-w-full px-1">{top3[1]?.department ?? ""}</span>
                       </div>
                     </div>
-                    {/* 1st */}
+                    {/* 1위 */}
                     <div className="flex flex-col items-center gap-2">
                       <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-yellow-300 to-amber-500 shadow-lg ring-4 ring-yellow-200 dark:ring-yellow-700">
                         <Trophy className="h-10 w-10 text-white drop-shadow" />
@@ -297,7 +295,7 @@ export default function RankingPage() {
                         <span className="text-xs text-yellow-600/70 dark:text-yellow-400/70 mt-0.5 truncate max-w-full px-1">{top3[0]?.department ?? ""}</span>
                       </div>
                     </div>
-                    {/* 3rd */}
+                    {/* 3위 */}
                     <div className="flex flex-col items-center gap-2">
                       <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-amber-300 to-orange-400 shadow-md ring-4 ring-amber-200 dark:ring-amber-800">
                         <span className="font-mono text-2xl font-bold text-white">3</span>
@@ -314,7 +312,7 @@ export default function RankingPage() {
               </Card>
             )}
 
-            {/* Full Ranking Table */}
+            {/* 전체 테이블 */}
             {!initializing && rankings.length > 0 && (
               <Card>
                 <CardHeader>

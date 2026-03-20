@@ -1,5 +1,6 @@
 "use client"
 
+/** 내 기록: 최근 챌린지 진행·일별 풀이·주차 이력 */
 import Image from "next/image"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
@@ -46,7 +47,7 @@ function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" })
 }
 
-// Use local time (not UTC) to avoid off-by-one date issues in KST
+/** 로컬 날짜 문자열(한국에서 UTC 파싱 시 하루 어긋남 방지) */
 function toYYYYMMDD(d: Date): string {
   const y = d.getFullYear()
   const m = String(d.getMonth() + 1).padStart(2, "0")
@@ -55,7 +56,6 @@ function toYYYYMMDD(d: Date): string {
 }
 
 function getWeekDays(startAt: string): Date[] {
-  // Parse as local date to avoid timezone shift
   const [datePart] = startAt.split("T")
   const [y, mo, day] = datePart.split("-").map(Number)
   const start = new Date(y, mo - 1, day)
@@ -96,7 +96,7 @@ export default function MyRecordPage() {
         ])
         setSummary(rec)
 
-        // Sort weeks by startAt descending so items[0] is the most recent
+        // startAt 내림차순 → [0]이 가장 최근 챌린지
         const sorted = [...w.items].sort(
           (a, b) => new Date(b.startAt).getTime() - new Date(a.startAt).getTime()
         )
@@ -111,7 +111,6 @@ export default function MyRecordPage() {
 
           const days = getWeekDays(current.startAt)
           const today = new Date()
-          // Only fetch past days (up to and including today)
           const pastDays = days.filter(d => {
             const dDate = toYYYYMMDD(d)
             const todayDate = toYYYYMMDD(today)
@@ -186,7 +185,7 @@ export default function MyRecordPage() {
               </div>
             )}
 
-            {/* ── Summary Cards (최상단) ─────────────────────────────────── */}
+            {/* 요약 카드 */}
             <div className="grid gap-4 md:grid-cols-3">
               <Card className="hover:shadow-md transition-shadow">
                 <CardContent className="p-6 flex items-center gap-4">
@@ -226,7 +225,7 @@ export default function MyRecordPage() {
               </Card>
             </div>
 
-            {/* ── Current Challenge Status ──────────────────────────────── */}
+            {/* 이번 챌린지 진행 */}
             {currentChallenge && progress ? (
               <Card className="overflow-hidden border-primary/30">
                 <div className="h-1.5 w-full bg-gradient-to-r from-blue-500 via-sky-400 to-blue-400" />
@@ -303,7 +302,7 @@ export default function MyRecordPage() {
               </Card>
             )}
 
-            {/* ── Daily Progress ────────────────────────────────────────── */}
+            {/* 요일별 풀이 수 */}
             <Card>
               <CardHeader>
                 <CardTitle>일일 진행 상황</CardTitle>
@@ -340,7 +339,7 @@ export default function MyRecordPage() {
               </CardContent>
             </Card>
 
-            {/* ── 이번 주 해결한 문제 ───────────────────────────────────── */}
+            {/* 이번 주 풀이 목록 */}
             <Card>
               <CardHeader>
                 <CardTitle>이번 주 해결한 문제</CardTitle>
@@ -392,7 +391,7 @@ export default function MyRecordPage() {
               </CardContent>
             </Card>
 
-            {/* ── Weekly History ────────────────────────────────────────── */}
+            {/* 지난 주차 이력 */}
             <Card>
               <CardHeader>
                 <CardTitle>지난 주간 활동 내역</CardTitle>

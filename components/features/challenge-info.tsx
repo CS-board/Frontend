@@ -1,3 +1,4 @@
+/** 홈 등에 쓰이는 챌린지 요약 카드(샘플 수치 — 실데이터는 API 연동 시 교체) */
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Calendar, TrendingUp, Trophy } from "lucide-react"
 

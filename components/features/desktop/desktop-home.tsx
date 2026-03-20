@@ -1,5 +1,6 @@
 "use client"
 
+/** 데스크톱 홈: 히어로·참여방법·일정·점수표(챌린지 id=1 요약은 API, 나머지 정적) */
 import { useEffect, useState } from "react"
 import { Sidebar } from "@/components/features/sidebar"
 import { Footer } from "@/components/features/footer"
@@ -47,7 +48,6 @@ export function DesktopHome() {
 
       <main className="flex-1 flex flex-col">
         <div className="flex-1">
-        {/* Hero Banner */}
         <section className="relative overflow-hidden"
           style={{ background: "linear-gradient(135deg, #3b82f6 0%, #0ea5e9 55%, #38bdf8 100%)" }}>
           {/* 배경 장식 */}
@@ -96,7 +96,6 @@ export function DesktopHome() {
                 </div>
               </div>
 
-              {/* Stats Grid */}
               <div className="grid grid-cols-2 gap-3 flex-shrink-0">
                 {[
                   { icon: Users, label: "참여자", value: challenge?.participantsCount ?? "—" },
@@ -119,7 +118,6 @@ export function DesktopHome() {
           </div>
         </section>
 
-        {/* How to Participate */}
         <section className="border-b border-border bg-muted/20 px-8 py-16">
           <div className="mx-auto max-w-6xl">
             <div className="mb-10 text-center">
@@ -153,7 +151,6 @@ export function DesktopHome() {
           </div>
         </section>
 
-        {/* Challenge Schedule */}
         <section className="border-b border-border bg-background px-8 py-12">
           <div className="mx-auto max-w-6xl">
             <div className="mb-8 text-center">
@@ -202,7 +199,6 @@ export function DesktopHome() {
           </div>
         </section>
 
-        {/* Scoring System */}
         <section className="px-8 py-16 bg-muted/20">
           <div className="mx-auto max-w-6xl">
             <div className="mb-10 text-center">

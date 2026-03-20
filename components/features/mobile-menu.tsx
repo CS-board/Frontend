@@ -1,5 +1,6 @@
 "use client"
 
+/** 모바일 햄버거 메뉴(오버레이 드로어) */
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import { Menu, X, Home, HelpCircle, Trophy, Settings, BarChart3, Newspaper, LogIn, UserPlus, LogOut, User } from "lucide-react"
@@ -63,18 +64,15 @@ export function MobileMenu() {
         <Menu className="h-6 w-6" />
       </Button>
 
-      {/* Overlay */}
       {isOpen && (
         <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm" onClick={() => setIsOpen(false)} />
       )}
 
-      {/* Drawer */}
       <div className={cn(
         "fixed right-0 top-0 z-50 h-full w-80 max-w-[85vw] border-l border-border bg-background shadow-lg transition-transform duration-300",
         isOpen ? "translate-x-0" : "translate-x-full",
       )}>
         <div className="flex h-full flex-col">
-          {/* Header */}
           <div className="flex items-center justify-between border-b border-border px-4 py-4">
             <Link href="/" onClick={() => setIsOpen(false)} className="flex items-center gap-2">
               <Image src="/logo.png" alt="CHIP_SAT" width={28} height={28} className="rounded-md" />
@@ -85,7 +83,6 @@ export function MobileMenu() {
             </Button>
           </div>
 
-          {/* User Info */}
           <div className="border-b border-border p-4">
             {loading ? (
               <div className="h-16 rounded-lg bg-muted animate-pulse" />
@@ -113,7 +110,6 @@ export function MobileMenu() {
             )}
           </div>
 
-          {/* Navigation */}
           <nav className="flex-1 space-y-1 p-4 overflow-y-auto">
             {navItems.map((item) => {
               const Icon = item.icon
