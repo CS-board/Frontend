@@ -1,8 +1,12 @@
+/**
+ * 백엔드 API 호출 + JWT(Access Token) 자동 갱신.
+ * RT는 httpOnly 쿠키, AT는 localStorage(TOKEN_KEY)에 둠.
+ */
 import { TOKEN_KEY } from '@/constants'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
-// Refresh the token this many ms before actual expiry (5 minutes)
+/** AT 만료 시각보다 이 만큼 일찍 선제 갱신 (5분) */
 const REFRESH_BUFFER_MS = 5 * 60 * 1000
 
 function getTokenExpiry(token: string): number | null {
@@ -22,10 +26,10 @@ function isTokenExpiredOrExpiring(token: string): boolean {
   return Date.now() >= expiry - REFRESH_BUFFER_MS
 }
 
-// Result of a refresh attempt
+/** 갱신 결과: ok면 새 AT, 실패 시 logout 여부(재로그인 필요 vs 일시 오류) */
 type RefreshResult =
   | { ok: true; token: string }
-  | { ok: false; logout: boolean }   // logout=true → force login, false → transient error
+  | { ok: false; logout: boolean }
 
 class ApiClient {
   private baseURL: string
@@ -55,10 +59,7 @@ class ApiClient {
     this.refreshSubscribers.push(cb)
   }
 
-  // Attempt to get a new AT using the RT cookie.
-  // Returns { ok: true, token } on success.
-  // Returns { ok: false, logout: true } only on explicit 401/403 from the refresh endpoint.
-  // Returns { ok: false, logout: false } on network errors or any other transient failure.
+  /** POST /auth/refresh (쿠키 RT). 401/403/404면 재로그인, 그 외/네트워크는 비로그아웃 실패 */
   async tryRefreshToken(): Promise<RefreshResult> {
     try {
       const res = await fetch(`${this.baseURL}/auth/refresh`, {
@@ -67,12 +68,14 @@ class ApiClient {
       })
 
       if (res.status === 401 || res.status === 403) {
-        // Refresh token is invalid or expired — must log in again
+        return { ok: false, logout: true }
+      }
+
+      if (res.status === 404) {
         return { ok: false, logout: true }
       }
 
       if (!res.ok) {
-        // Some other server error — don't log out, just fail this request
         return { ok: false, logout: false }
       }
 
@@ -84,12 +87,11 @@ class ApiClient {
       this.scheduleProactiveRefresh(token)
       return { ok: true, token }
     } catch {
-      // Network unreachable — don't log out
       return { ok: false, logout: false }
     }
   }
 
-  // Schedule a silent refresh ~5 min before the AT expires
+  /** 다음 만료 5분 전에 백그라운드로 한 번 더 갱신 예약 */
   scheduleProactiveRefresh(token: string) {
     if (typeof window === 'undefined') return
     if (this.refreshTimer) clearTimeout(this.refreshTimer)
@@ -138,7 +140,7 @@ class ApiClient {
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`
 
-    // ── Pre-flight: refresh proactively if AT is expired / expiring soon ──────
+    // 요청 전: AT가 곧 만료면 먼저 갱신
     if (typeof window !== 'undefined' && !this.isRefreshing) {
       const token = localStorage.getItem(TOKEN_KEY)
       if (token && isTokenExpiredOrExpiring(token)) {
@@ -152,7 +154,7 @@ class ApiClient {
             this.forceLogout()
             throw new Error('세션이 만료되었습니다. 다시 로그인해 주세요.')
           }
-          // Transient error — proceed with the stale token and let the server decide
+          // logout 아님(네트워크 등) → 만료된 AT로 그대로 요청(서버가 401 줄 수 있음)
         }
       }
     }
@@ -160,7 +162,6 @@ class ApiClient {
     const config = this.buildConfig(options)
     const response = await fetch(url, config)
 
-    // Not 401 — handle normally
     if (response.status !== 401) {
       if (!response.ok) {
         const errorBody = await response.json().catch(() => null)
@@ -169,8 +170,7 @@ class ApiClient {
       return response.json()
     }
 
-    // ── 401: try to refresh ───────────────────────────────────────────────────
-
+    // 401이면 갱신 후 원요청 1회 재시도
     if (!this.isRefreshing) {
       this.isRefreshing = true
       const result = await this.tryRefreshToken()
@@ -184,7 +184,6 @@ class ApiClient {
         throw new Error('세션이 만료되었습니다. 다시 로그인해 주세요.')
       }
 
-      // Retry original request with new token
       const retryConfig: RequestInit = {
         ...config,
         headers: {
@@ -200,7 +199,7 @@ class ApiClient {
       return retryRes.json()
     }
 
-    // Another request is already refreshing — wait for its result
+    // 동시 요청: 이미 갱신 중이면 완료 후 같은 방식으로 재시도
     return new Promise<T>((resolve, reject) => {
       this.subscribeTokenRefresh(async (result) => {
         if (!result.ok) {
