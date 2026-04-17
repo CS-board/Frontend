@@ -23,6 +23,11 @@ export interface ChallengeDetails extends ChallengeSummary {
   lastUpdatedAt: string
 }
 
+/** GET /challenges 목록 항목 */
+export interface ChallengeListItem extends ChallengeSummary {
+  challengeId: number
+}
+
 export interface ChallengeRankingItem {
   rank: number
   userId: number

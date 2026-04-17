@@ -28,6 +28,7 @@ export const API_ENDPOINTS = {
     PASSWORD_RESET: '/auth/password/reset',
   },
   CHALLENGES: {
+    LIST: '/challenges',
     RANKINGS: (id: number) => `/challenges/${id}/rankings`,
     INFO_SUMMARY: (id: number) => `/challenges/${id}/details`,
     INFO_DETAILS: (id: number) => `/challenges/${id}/details`,

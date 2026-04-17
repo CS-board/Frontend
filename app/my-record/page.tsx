@@ -56,8 +56,11 @@ function toYYYYMMDD(d: Date): string {
 }
 
 function getWeekDays(startAt: string): Date[] {
+  if (!startAt || typeof startAt !== "string") return []
   const [datePart] = startAt.split("T")
+  if (!datePart) return []
   const [y, mo, day] = datePart.split("-").map(Number)
+  if (!Number.isFinite(y) || !Number.isFinite(mo) || !Number.isFinite(day)) return []
   const start = new Date(y, mo - 1, day)
   return Array.from({ length: 7 }, (_, i) => {
     const d = new Date(start)
@@ -103,28 +106,35 @@ export default function MyRecordPage() {
         setWeeks(sorted)
 
         if (sorted.length > 0) {
-          const current = sorted[0]
+          const current =
+            sorted.find((w) => w.challengeId > 0 && w.startAt) ?? sorted[0]
           setCurrentChallenge(current)
 
-          const prog = await recordService.getProgressSummary(current.challengeId)
-          setProgress(prog)
+          if (current.challengeId > 0 && current.startAt) {
+            const prog = await recordService.getProgressSummary(current.challengeId)
+            setProgress(prog)
 
-          const days = getWeekDays(current.startAt)
-          const today = new Date()
-          const pastDays = days.filter(d => {
-            const dDate = toYYYYMMDD(d)
-            const todayDate = toYYYYMMDD(today)
-            return dDate <= todayDate
-          })
+            const days = getWeekDays(current.startAt)
+            const today = new Date()
+            const pastDays = days.filter((d) => {
+              const dDate = toYYYYMMDD(d)
+              const todayDate = toYYYYMMDD(today)
+              return dDate <= todayDate
+            })
 
-          const entries = await Promise.all(
-            pastDays.map(d =>
-              recordService.getDailySolved(current.challengeId, toYYYYMMDD(d))
-                .then(r => [toYYYYMMDD(d), r.items] as [string, DailySolvedProblem[]])
-                .catch(() => [toYYYYMMDD(d), []] as [string, DailySolvedProblem[]])
+            const entries = await Promise.all(
+              pastDays.map((d) =>
+                recordService
+                  .getDailySolved(current.challengeId, toYYYYMMDD(d))
+                  .then((r) => [toYYYYMMDD(d), r.items] as [string, DailySolvedProblem[]])
+                  .catch(() => [toYYYYMMDD(d), []] as [string, DailySolvedProblem[]])
+              )
             )
-          )
-          setDailySolved(Object.fromEntries(entries))
+            setDailySolved(Object.fromEntries(entries))
+          } else {
+            setProgress(null)
+            setDailySolved({})
+          }
         }
       } catch (e) {
         setError(e instanceof Error ? e.message : "데이터를 불러오는데 실패했습니다")
@@ -134,14 +144,6 @@ export default function MyRecordPage() {
     }
     load()
   }, [router])
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
-      </div>
-    )
-  }
 
   const achievementPct = progress ? Math.min(100, Math.round(progress.achievementRate * 100)) : 0
   const weekDays: (Date | undefined)[] = currentChallenge
@@ -179,6 +181,12 @@ export default function MyRecordPage() {
               <p className="text-muted-foreground mt-2">이번 주 진행 상황과 활동 내역을 확인하세요</p>
             </div>
 
+            {loading ? (
+              <div className="flex justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
+              <>
             {error && (
               <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive text-center">
                 {error}
@@ -433,6 +441,8 @@ export default function MyRecordPage() {
                 )}
               </CardContent>
             </Card>
+              </>
+            )}
           </div>
           </div>
           <Footer />

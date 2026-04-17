@@ -30,51 +30,48 @@ function formatDateMidnight(iso: string) {
 
 const CACHE_KEY = "chipsat_active_challenge_id"
 
-/** ACTIVE 시즌 id 탐색: sessionStorage 캐시 → 없으면 id 1~50 순차 조회 */
-async function findLatestChallengeId(): Promise<number> {
-  if (typeof window !== "undefined") {
-    const cached = sessionStorage.getItem(CACHE_KEY)
-    if (cached) {
-      const cachedId = parseInt(cached, 10)
-      try {
-        const s = await challengeService.getSummary(cachedId)
-        if (s?.status === "ACTIVE") return cachedId
-        try {
-          const next = await challengeService.getSummary(cachedId + 1)
-          if (next?.status === "ACTIVE" || next?.status === "SCHEDULED") {
-            sessionStorage.setItem(CACHE_KEY, String(cachedId + 1))
-            return cachedId + 1
-          }
-        } catch { /* 다음 시즌 없음 */ }
-        return cachedId
-      } catch { /* 캐시 무효 → 아래 전체 스캔 */ }
+/**
+ * 랭킹 페이지 최초 시즌: GET /challenges 목록만 신뢰.
+ * (이전 로직은 캐시 1 + getSummary(2)가 SCHEDULED/ACTIVE면 id를 2로 올려,
+ * 실제로는 2번 시즌이 없어도 /challenges/2/details를 호출하는 문제가 있었음.)
+ */
+async function findDefaultRankingChallengeId(): Promise<number> {
+  try {
+    const list = await challengeService.listChallenges()
+    if (list.length === 0) {
+      if (typeof window !== "undefined") sessionStorage.setItem(CACHE_KEY, "1")
+      return 1
     }
-  }
 
-  let lastValid = 1
-  let consecutiveErrors = 0
-  // 연속 3회 실패 시 중단(존재하지 않는 id 구간)
-  for (let i = 1; i <= 50; i++) {
-    try {
-      const summary = await challengeService.getSummary(i)
-      if (!summary) {
-        consecutiveErrors++
-        if (consecutiveErrors >= 3) break
-        continue
-      }
-      consecutiveErrors = 0
-      lastValid = i
-      if (summary.status === "ACTIVE") {
-        if (typeof window !== "undefined") sessionStorage.setItem(CACHE_KEY, String(i))
-        return i
-      }
-    } catch {
-      consecutiveErrors++
-      if (consecutiveErrors >= 3) break
+    const active = list.find((c) => c.status === "ACTIVE")
+    if (active) {
+      if (typeof window !== "undefined") sessionStorage.setItem(CACHE_KEY, String(active.challengeId))
+      return active.challengeId
     }
+
+    const scheduled = list
+      .filter((c) => c.status === "SCHEDULED")
+      .sort((a, b) => b.challengeId - a.challengeId)[0]
+    if (scheduled) {
+      if (typeof window !== "undefined") sessionStorage.setItem(CACHE_KEY, String(scheduled.challengeId))
+      return scheduled.challengeId
+    }
+
+    const closed = list
+      .filter((c) => c.status === "CLOSED")
+      .sort((a, b) => b.challengeId - a.challengeId)[0]
+    if (closed) {
+      if (typeof window !== "undefined") sessionStorage.setItem(CACHE_KEY, String(closed.challengeId))
+      return closed.challengeId
+    }
+
+    const latest = [...list].sort((a, b) => b.challengeId - a.challengeId)[0]
+    if (typeof window !== "undefined") sessionStorage.setItem(CACHE_KEY, String(latest.challengeId))
+    return latest.challengeId
+  } catch {
+    if (typeof window !== "undefined") sessionStorage.setItem(CACHE_KEY, "1")
+    return 1
   }
-  if (typeof window !== "undefined") sessionStorage.setItem(CACHE_KEY, String(lastValid))
-  return lastValid
 }
 
 export default function RankingPage() {
@@ -91,12 +88,14 @@ export default function RankingPage() {
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc")
 
   useEffect(() => {
-    findLatestChallengeId().then(id => {
-      setChallengeId(id)
-      setInitializing(false)
-    }).catch(() => {
-      setInitializing(false)
-    })
+    findDefaultRankingChallengeId()
+      .then((id) => {
+        setChallengeId(id)
+        setInitializing(false)
+      })
+      .catch(() => {
+        setInitializing(false)
+      })
   }, [])
 
   const fetchData = useCallback(async (cid: number, p: number) => {
