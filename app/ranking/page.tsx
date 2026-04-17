@@ -22,8 +22,10 @@ type SortOrder = "asc" | "desc"
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" })
 }
-function formatDateTime(iso: string) {
-  return new Date(iso).toLocaleString("ko-KR", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })
+
+function formatDateMidnight(iso: string) {
+  const d = new Date(iso)
+  return `${d.getMonth() + 1}월 ${d.getDate()}일 00시 00분`
 }
 
 const CACHE_KEY = "chipsat_active_challenge_id"
@@ -249,7 +251,7 @@ export default function RankingPage() {
                     <div>
                       <p className="text-sm text-muted-foreground">마지막 갱신</p>
                       <div className="text-xl font-bold font-mono">
-                        {loading ? <Loader2 className="h-6 w-6 animate-spin" /> : (generatedAt ? formatDateTime(generatedAt) : "—")}
+                        {loading ? <Loader2 className="h-6 w-6 animate-spin" /> : (generatedAt ? formatDateMidnight(generatedAt) : "—")}
                       </div>
                       <p className="text-xs text-muted-foreground">매일 자정 갱신</p>
                     </div>
